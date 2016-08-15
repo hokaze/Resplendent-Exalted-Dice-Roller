@@ -1,0 +1,15 @@
+<resources>
+    <string name="app_name">Resplendent Exalted Dice Roller</string>
+    <string name="number_of_d10s">Number of d10s:</string>
+    <string name="_10s_count_as_doubles">10s count as doubles</string>
+    <string name="botches_subtract_successes">Botches subtract successes</string>
+    <string name="roll">Roll!</string>
+    <string name="results">Results:</string>
+    <string name="successes">Successes:</string>
+    <string name="dice_tricks">Dice Tricks</string>
+    <string name="enable_3rd_edition_dice_tricks">Enable Dice Tricks:</string>
+    <string name="colour_highlighting">Colour highlighting</string>
+
+    <!-- AdMob ad unit IDs -->
+    <string name="banner_ad">ca-app-pub-0664570763252260/3326522424</string>
+</resources>
