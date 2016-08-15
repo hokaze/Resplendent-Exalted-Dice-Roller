@@ -36,8 +36,8 @@ public class MainActivity extends AppCompatActivity {
     static Random ranDice = new Random();
     ArrayList<String> trickList = new ArrayList<String>();
     boolean[] trickValues = new boolean[12]; // ugh, magic number for list size, need to declare early for save/restore
-    final SpannableStringBuilder builder = new SpannableStringBuilder();
-    final SpannableStringBuilder successStr = new SpannableStringBuilder();
+    final SpannableStringBuilder builder = new SpannableStringBuilder("Results: ");
+    final SpannableStringBuilder successStr = new SpannableStringBuilder("Successes: ");
     int diceCount = 0;
 
     @Override
@@ -358,11 +358,13 @@ public class MainActivity extends AppCompatActivity {
         tvResults.setText(savedInstanceState.getString("ResultsString"));
         if (checkColours.isChecked()) {
             Spanned spanResults = Html.fromHtml(savedInstanceState.getString("SpanResultsString"));
+            builder.clear();
             builder.append(spanResults); // need this or multiple coloured rotations in a row lose data
             tvResults.setText(spanResults);
         }
         // Make successes/botches display the number in bold on reload
         Spanned spanSuccess = Html.fromHtml(savedInstanceState.getString("SuccessString"));
+        successStr.clear();
         successStr.append(spanSuccess);
         tvSuccess.setText(successStr);
     }
