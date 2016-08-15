@@ -60,12 +60,13 @@ public class MainActivity extends AppCompatActivity {
         checkEx3=(CheckBox)findViewById(R.id.enableEx3);
 
         AdView mAdView = (AdView) findViewById(R.id.adView);
-        // Deploy test ads to emulator and test physical device
-        /*AdRequest adRequest = new AdRequest.Builder()
-                .addTestDevice(AdRequest.DEVICE_ID_EMULATOR) // All emulators
+        // Deploy test ads to emulator and test physical device, other devices will get real ads
+        // (Don't want to accidentally click my own ads and get suspended!)
+        AdRequest adRequest = new AdRequest.Builder()
+                //.addTestDevice(AdRequest.DEVICE_ID_EMULATOR) // All emulators
                 .addTestDevice("9E352341EE24936E89C7621696793500")  // My Phone as test device
-                .build();*/
-        AdRequest adRequest = new AdRequest.Builder().build(); // Actual ads
+                .build();
+        //AdRequest adRequest = new AdRequest.Builder().build(); // Actual ads
         mAdView.loadAd(adRequest);
 
         trickList.add("Double 9s and above");
@@ -83,6 +84,18 @@ public class MainActivity extends AppCompatActivity {
         // Convert arraylist into charsequence for dialog checkbox and store the values
         final CharSequence[] dialogList = trickList.toArray(new CharSequence[trickList.size()]);
         trickValues = new boolean[dialogList.length]; // checkbox persists when dialog is closed
+
+        // Highlights all text for fast deletion when you select the d10 text box
+        etDice.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                //etDice.clearFocus();
+                //etDice.requestFocus();
+                //etDice.clearFocus();
+                etDice.setText(etDice.getText());
+                etDice.selectAll();
+            }
+        });
 
         // Roll button pressed
         bRoll.setOnClickListener(new View.OnClickListener() {
