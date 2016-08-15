@@ -63,15 +63,13 @@
         android:textAppearance="?android:attr/textAppearanceSmall"
         android:id="@+id/resultsView"
         android:text="@string/results"
-        android:layout_alignParentStart="true"
-        android:layout_below="@+id/rollButton"
-        android:layout_alignParentLeft="true"
-        android:layout_above="@+id/successView"
-        android:layout_alignRight="@+id/d10s"
-        android:layout_alignEnd="@+id/d10s"
         android:enabled="true"
+        android:layout_above="@+id/adView"
         android:layout_alignParentRight="true"
-        android:layout_alignParentBottom="false" />
+        android:layout_alignParentEnd="true"
+        android:layout_below="@+id/successView"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true" />
 
     <TextView
         android:layout_width="wrap_content"
@@ -80,13 +78,12 @@
         android:id="@+id/successView"
         android:text="@string/successes"
         android:enabled="true"
+        android:maxLines="1"
         android:layout_alignParentRight="true"
         android:layout_alignParentEnd="true"
-        android:layout_toEndOf="@+id/botchesSubtract"
-        android:layout_above="@+id/adView"
+        android:layout_below="@+id/rollButton"
         android:layout_alignParentLeft="true"
-        android:layout_alignParentStart="true"
-        android:maxLines="1" />
+        android:layout_alignParentStart="true" />
 
     <CheckBox
         android:layout_width="wrap_content"
