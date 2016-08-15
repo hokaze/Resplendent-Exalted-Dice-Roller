@@ -38,6 +38,7 @@ public class MainActivity extends AppCompatActivity {
     ArrayList<String> trickList = new ArrayList<String>();
     boolean[] trickValues = new boolean[12]; // ugh, magic number for list size, need to declare early for save/restore
     final SpannableStringBuilder builder = new SpannableStringBuilder("Results: ");
+    String simple = "Results: ";
     final SpannableStringBuilder successStr = new SpannableStringBuilder("Successes: ");
     int diceCount = 0;
 
@@ -100,170 +101,189 @@ public class MainActivity extends AppCompatActivity {
 
         // Roll button pressed
         bRoll.setOnClickListener(new View.OnClickListener() {
+
             // Roll dice in function so it can be called from onClick and the 1000+ dice alertdialog
-            public void rollDice(boolean showLoad) {
-                int successes = 0, botches = 0;
-                String simple = "";
-                ProgressDialog loading = new ProgressDialog(MainActivity.this);
+            public void rollDice() {
 
-                // Display loading spinner for large amounts of dice
-                if (showLoad) {
-                    loading.setProgressStyle(ProgressDialog.STYLE_SPINNER);
-                    loading.setMessage("Rolling. Please wait...");
-                    loading.setIndeterminate(true);
-                    loading.setCanceledOnTouchOutside(false);
-                    loading.show();
-                }
+                // Display loading spinner, mostly used for larger numbers of dice
+                final ProgressDialog loading = new ProgressDialog(MainActivity.this);
+                loading.setProgressStyle(ProgressDialog.STYLE_SPINNER);
+                loading.setMessage("Rolling. Please wait...");
+                loading.setIndeterminate(true);
+                loading.setCanceledOnTouchOutside(false);
+                loading.show();
 
-                // Prepare results view
-                if (checkColours.isChecked() == true) {
-                    builder.clear();
-                    builder.append("Results: ");
-                }
-                else {
-                    simple = "Results: ";
-                }
 
-                // Determine which numbers have success, doubles, rerolls, etc
-                int targetNumber = 7;
-                int doubleNumber = 11; // cannot get double successes unless double 10s/9s/8s/7s in effect
-                ArrayList<Integer> rerollList = new ArrayList<Integer>();
-                boolean rerollAllowed = true; // Set to false for dice created by non-exploding reroll dice tricks
-                if (checkTens.isChecked()) {doubleNumber = 10;}
-                if (checkEx3.isChecked()) {
-                    // Double 9s/8s/7s
-                    if (trickValues[0] == true) {doubleNumber = 9;}
-                    if (trickValues[1] == true) {doubleNumber = 8;}
-                    if (trickValues[2] == true) {doubleNumber = 7;}
-                    // Exploding 10s, reroll 6s/5s/1s
-                    if (trickValues[3] == true) {rerollList.add(10);}
-                    if (trickValues[4] == true) {rerollList.add(6);}
-                    if (trickValues[5] == true) {rerollList.add(5);}
-                    if (trickValues[6] == true) {rerollList.add(1);}
-                    // TN 6s/5s/4s
-                    if (trickValues[8] == true) {targetNumber = 6;}
-                    if (trickValues[9] == true) {targetNumber = 5;}
-                    if (trickValues[10] == true) {targetNumber = 4;}
-                    // Reroll non-successes
-                    if (trickValues[7] == true) {
-                        for (int i = 1; i < targetNumber; ++i) {
-                            // If any of the above rerolls are enabled, the number is added to the list
-                            // twice, but doesn't trigger 2d10 extra, only 1d10
-                            rerollList.add(i);
-                        }
-                    }
-                }
+                // Sort out the strings and dice rolling in a seperate thread
+                new Thread(new Runnable() {
+                    @Override
+                    public void run() {
+                        try {
+                            int successes = 0, botches = 0;
 
-                // Loop through dice rolled
-                for (int i = 0; i < diceCount; ++i){
-                    int randomInt = ranDice.nextInt(10)+1;
-                    int colour = Color.BLACK;
-                    boolean bold = false;
-
-                    // Success
-                    if (randomInt >= targetNumber) {
-                        ++successes;
-                        colour = Color.rgb(50, 200, 50); // A green that isn't as painfully bright as Color.GREEN
-
-                        // Check if the number has double successes
-                        if (randomInt >= doubleNumber) {
-                            ++successes;
-                            colour = Color.rgb(50, 50, 200); // Blue
-                        }
-                    }
-
-                    // Fail
-                    else {
-                        // Botch
-                        if (randomInt == 1) {
-                            ++botches;
-                            colour = Color.rgb(200, 50, 50); // Red, less blinding than Color.RED
-                            // Some Systems have botches subtract successes
-                            if (checkBotches.isChecked()) {
-                                --successes;
+                            // Prepare results view
+                            if (checkColours.isChecked() == true) {
+                                builder.clear();
+                                builder.append("Results: ");
                             }
-                        }
-                    }
+                            else {
+                                simple = "Results: ";
+                            }
 
-                    // Check for exploding dice or rerolls
-                    if (rerollAllowed == true && rerollList.size() > 0) {
-                        for (int j = 0; j < rerollList.size(); ++j) {
-                            // Primitive infinite reroller
-                            if (randomInt == rerollList.get(j)) {
-                                --i;
-                                bold = true;
-                                // Only 10s may explode ad infinatum
-                                if (randomInt != 10) {
-                                    rerollAllowed = false;
+                            // Determine which numbers have success, doubles, rerolls, etc
+                            int targetNumber = 7;
+                            int doubleNumber = 11; // cannot get double successes unless double 10s/9s/8s/7s in effect
+                            ArrayList<Integer> rerollList = new ArrayList<Integer>();
+                            boolean rerollAllowed = true; // Set to false for dice created by non-exploding reroll dice tricks
+                            if (checkTens.isChecked()) {doubleNumber = 10;}
+                            if (checkEx3.isChecked()) {
+                                // Double 9s/8s/7s
+                                if (trickValues[0] == true) {doubleNumber = 9;}
+                                if (trickValues[1] == true) {doubleNumber = 8;}
+                                if (trickValues[2] == true) {doubleNumber = 7;}
+                                // Exploding 10s, reroll 6s/5s/1s
+                                if (trickValues[3] == true) {rerollList.add(10);}
+                                if (trickValues[4] == true) {rerollList.add(6);}
+                                if (trickValues[5] == true) {rerollList.add(5);}
+                                if (trickValues[6] == true) {rerollList.add(1);}
+                                // TN 6s/5s/4s
+                                if (trickValues[8] == true) {targetNumber = 6;}
+                                if (trickValues[9] == true) {targetNumber = 5;}
+                                if (trickValues[10] == true) {targetNumber = 4;}
+                                // Reroll non-successes
+                                if (trickValues[7] == true) {
+                                    for (int i = 1; i < targetNumber; ++i) {
+                                        // If any of the above rerolls are enabled, the number is added to the list
+                                        // twice, but doesn't trigger 2d10 extra, only 1d10
+                                        rerollList.add(i);
+                                    }
                                 }
                             }
+
+                            // Loop through dice rolled
+                            for (int i = 0; i < diceCount; ++i){
+                                int randomInt = ranDice.nextInt(10)+1;
+                                int colour = Color.BLACK;
+                                boolean bold = false;
+
+                                // Success
+                                if (randomInt >= targetNumber) {
+                                    ++successes;
+                                    colour = Color.rgb(50, 200, 50); // A green that isn't as painfully bright as Color.GREEN
+
+                                    // Check if the number has double successes
+                                    if (randomInt >= doubleNumber) {
+                                        ++successes;
+                                        colour = Color.rgb(50, 50, 200); // Blue
+                                    }
+                                }
+
+                                // Fail
+                                else {
+                                    // Botch
+                                    if (randomInt == 1) {
+                                        ++botches;
+                                        colour = Color.rgb(200, 50, 50); // Red, less blinding than Color.RED
+                                        // Some Systems have botches subtract successes
+                                        if (checkBotches.isChecked()) {
+                                            --successes;
+                                        }
+                                    }
+                                }
+
+                                // Check for exploding dice or rerolls
+                                if (rerollAllowed == true && rerollList.size() > 0) {
+                                    for (int j = 0; j < rerollList.size(); ++j) {
+                                        // Primitive infinite reroller
+                                        if (randomInt == rerollList.get(j)) {
+                                            --i;
+                                            bold = true;
+                                            // Only 10s may explode ad infinatum
+                                            if (randomInt != 10) {
+                                                rerollAllowed = false;
+                                            }
+                                        }
+                                    }
+                                }
+                                else {
+                                    // Even if d10 was generated by a reroll once roll, 10s can always explode if enabled
+                                    if (randomInt == 10 && rerollList.contains(10)) {
+                                        --i;
+                                        bold = true;
+                                    }
+                                    rerollAllowed = true;
+                                }
+
+                                // Display results with new coloured text for botch/success/doubles
+                                if (checkColours.isChecked()) {
+                                    SpannableString resultStr = new SpannableString(String.valueOf(randomInt));
+                                    resultStr.setSpan(new ForegroundColorSpan(colour), 0, resultStr.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+                                    // If d10 triggered a reroll or explosion, use bold text
+                                    if (bold == true) {
+                                        resultStr.setSpan(new StyleSpan(Typeface.BOLD), 0, resultStr.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+                                    }
+                                    builder.append(resultStr);
+                                    builder.append(" ");
+                                }
+                                else {
+                                    simple += String.valueOf(randomInt);
+                                    simple += " ";
+                                    //tvResults.append(String.valueOf(randomInt));
+                                    //tvResults.append(" ");
+                                }
+                            }
+
+                            // Handle success/botch formatting
+                            successStr.clear();
+                            if (successes < 1 && botches > 0) {
+                                //tvSuccess.setText("Botches: ");
+                                // Display number of botches in BOLD
+                                successStr.append("Botches: ");
+                                SpannableString botchStr = new SpannableString(String.valueOf(botches));
+                                botchStr.setSpan(new StyleSpan(Typeface.BOLD), 0, botchStr.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+                                successStr.append(botchStr);
+                                //tvSuccess.append(String.valueOf(botches));)
+                                //totalStr = new SpannableString(String.valueOf(botches));
+                                //tvSuccess.append(String.valueOf(botches));
+                            }
+                            else {
+                                //tvSuccess.setText("Successes: ");
+                                // Display number of successes in BOLD
+                                successStr.append("Successes: ");
+                                SpannableString succStr = new SpannableString(String.valueOf(successes));
+                                succStr.setSpan(new StyleSpan(Typeface.BOLD), 0, succStr.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+                                successStr.append(succStr);
+                                //totalStr = new SpannableString(String.valueOf(successes));
+                                //tvSuccess.append(String.valueOf(successes));
+                            }
+
+                            // UPDATE UI
+                            runOnUiThread(new Runnable() {
+                                @Override
+                                public void run() {
+                                    // Use colours and formatted text if enabled
+                                    if (checkColours.isChecked()) {
+                                        tvResults.setText(builder, TextView.BufferType.SPANNABLE);
+                                    }
+                                    else {
+                                        tvResults.setText(simple, TextView.BufferType.SPANNABLE);
+                                    }
+                                    // Reset scroller to top, fixes bug where scrolling down on a large dice roll then doing
+                                    // a small roll would cause the results to disappear unless you scrolled up
+                                    tvResults.scrollTo(0,0);
+
+                                    // Set the success/botch display
+                                    tvSuccess.setText(successStr);
+                                }
+                            });
+
+                        } catch (Exception e) {
+
                         }
+                        loading.dismiss();
                     }
-                    else {
-                        // Even if d10 was generated by a reroll once roll, 10s can always explode if enabled
-                        if (randomInt == 10 && rerollList.contains(10)) {
-                            --i;
-                            bold = true;
-                        }
-                        rerollAllowed = true;
-                    }
+                }).start();
 
-                    // Display results with new coloured text for botch/success/doubles
-                    if (checkColours.isChecked()) {
-                        SpannableString resultStr = new SpannableString(String.valueOf(randomInt));
-                        resultStr.setSpan(new ForegroundColorSpan(colour), 0, resultStr.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
-                        // If d10 triggered a reroll or explosion, use bold text
-                        if (bold == true) {
-                            resultStr.setSpan(new StyleSpan(Typeface.BOLD), 0, resultStr.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
-                        }
-                        builder.append(resultStr);
-                        builder.append(" ");
-                    }
-                    else {
-                        simple += String.valueOf(randomInt);
-                        simple += " ";
-                        //tvResults.append(String.valueOf(randomInt));
-                        //tvResults.append(" ");
-                    }
-                }
-
-                // Use colours and formatted text if enabled
-                if (checkColours.isChecked()) {
-                    tvResults.setText(builder, TextView.BufferType.SPANNABLE);
-                }
-                else {
-                    tvResults.setText(simple, TextView.BufferType.SPANNABLE);
-                }
-                // Reset scroller to top, fixes bug where scrolling down on a large dice roll then doing
-                // a small roll would cause the results to disappear unless you scrolled up
-                tvResults.scrollTo(0,0);
-
-                // Handle success/botch display
-                successStr.clear();
-                if (successes < 1 && botches > 0) {
-                    //tvSuccess.setText("Botches: ");
-                    // Display number of botches in BOLD
-                    successStr.append("Botches: ");
-                    SpannableString botchStr = new SpannableString(String.valueOf(botches));
-                    botchStr.setSpan(new StyleSpan(Typeface.BOLD), 0, botchStr.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
-                    successStr.append(botchStr);
-                    //tvSuccess.append(String.valueOf(botches));)
-                    //totalStr = new SpannableString(String.valueOf(botches));
-                    //tvSuccess.append(String.valueOf(botches));
-                }
-                else {
-                    //tvSuccess.setText("Successes: ");
-                    // Display number of successes in BOLD
-                    successStr.append("Successes: ");
-                    SpannableString succStr = new SpannableString(String.valueOf(successes));
-                    succStr.setSpan(new StyleSpan(Typeface.BOLD), 0, succStr.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
-                    successStr.append(succStr);
-                    //totalStr = new SpannableString(String.valueOf(successes));
-                    //tvSuccess.append(String.valueOf(successes));
-                }
-                tvSuccess.setText(successStr);
-
-                loading.dismiss();
             }
 
             // Override default onClick event
@@ -318,7 +338,7 @@ public class MainActivity extends AppCompatActivity {
                                 @Override
                                 public void onDismiss(DialogInterface dialog) {
                                     if (rolling[0]) {
-                                        rollDice(true);
+                                        rollDice();
                                     }
 
                                 }
@@ -329,7 +349,7 @@ public class MainActivity extends AppCompatActivity {
 
                 // Roll with <1000 dice count, so no loading display
                 if (inDialog[0] == false) {
-                    rollDice(false);
+                    rollDice();
                 }
             }
         });
