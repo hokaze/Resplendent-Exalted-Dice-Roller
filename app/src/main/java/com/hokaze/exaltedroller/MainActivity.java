@@ -1,5 +1,6 @@
 package com.hokaze.exaltedroller;
 
+import android.app.ProgressDialog;
 import android.content.DialogInterface;
 import android.graphics.Color;
 import android.graphics.Typeface;
@@ -100,9 +101,19 @@ public class MainActivity extends AppCompatActivity {
         // Roll button pressed
         bRoll.setOnClickListener(new View.OnClickListener() {
             // Roll dice in function so it can be called from onClick and the 1000+ dice alertdialog
-            public void rollDice() {
+            public void rollDice(boolean showLoad) {
                 int successes = 0, botches = 0;
                 String simple = "";
+                ProgressDialog loading = new ProgressDialog(MainActivity.this);
+
+                // Display loading spinner for large amounts of dice
+                if (showLoad) {
+                    loading.setProgressStyle(ProgressDialog.STYLE_SPINNER);
+                    loading.setMessage("Rolling. Please wait...");
+                    loading.setIndeterminate(true);
+                    loading.setCanceledOnTouchOutside(false);
+                    loading.show();
+                }
 
                 // Prepare results view
                 if (checkColours.isChecked() == true) {
@@ -198,7 +209,6 @@ public class MainActivity extends AppCompatActivity {
                     }
 
                     // Display results with new coloured text for botch/success/doubles
-                    // TODO: Coloured/bolded text can lag with 1000+ dice, fix or limit high rolls
                     if (checkColours.isChecked()) {
                         SpannableString resultStr = new SpannableString(String.valueOf(randomInt));
                         resultStr.setSpan(new ForegroundColorSpan(colour), 0, resultStr.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
@@ -252,13 +262,15 @@ public class MainActivity extends AppCompatActivity {
                     //tvSuccess.append(String.valueOf(successes));
                 }
                 tvSuccess.setText(successStr);
+
+                loading.dismiss();
             }
 
             // Override default onClick event
             @Override
             public void onClick(View v) {
                 diceCount = 0;
-                boolean inDialog = false;
+                final boolean[] inDialog = {false};
                 // Prevent crashes in case textbox contains non-number
                 try {
                     diceCount = Integer.parseInt(etDice.getText().toString());
@@ -267,15 +279,33 @@ public class MainActivity extends AppCompatActivity {
                     //Toast.makeText(MainActivity.this, "Please enter a valid number of d10s to roll.", Toast.LENGTH_SHORT).show();
                 }
 
+                // User is taking the piss with dice and an arbitrary dice cap is enforced
+                if (diceCount > 9999) {
+                    inDialog[0] = true;
+                    new AlertDialog.Builder(MainActivity.this)
+                            .setTitle("Your dice are blotting out the sun!")
+                            .setMessage("Well, you're eager aren't you? Sorry, but the dice cap is set at 9,999.")
+                            .setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
+                                public void onClick(DialogInterface dialog, int which) {
+                                    // do nothing
+                                }
+                            })
+                            .setIcon(android.R.drawable.ic_dialog_alert)
+                            .show();
+                }
+
                 // If rolling a LOT of dice, show a warning and possibly prevent the roll
-                if (diceCount > 999) {
-                    inDialog = true;
+                else if (diceCount > 999) {
+                    inDialog[0] = true;
+                    final boolean[] rolling = {false};
                     new AlertDialog.Builder(MainActivity.this)
                             .setTitle("That's a LOT of d10s!")
-                            .setMessage("Are you sure you want to roll 1000+ dice? This may cause lag on some devices.")
+                            .setMessage("Are you sure you want to roll 500+ dice? This may cause lag on some devices.")
                             .setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
                                 public void onClick(DialogInterface dialog, int which) {
-                                    rollDice();
+                                    // Roll dice despite large number, but show a loading spinner
+                                    //rollDice(true);
+                                    rolling[0] = true;
                                 }
                             })
                             .setNegativeButton(android.R.string.no, new DialogInterface.OnClickListener() {
@@ -283,13 +313,23 @@ public class MainActivity extends AppCompatActivity {
                                     // Do nothing
                                 }
                             })
+                            .setOnDismissListener(new DialogInterface.OnDismissListener() {
+
+                                @Override
+                                public void onDismiss(DialogInterface dialog) {
+                                    if (rolling[0]) {
+                                        rollDice(true);
+                                    }
+
+                                }
+                            })
                             .setIcon(android.R.drawable.ic_dialog_alert)
                             .show();
                 }
 
-                // Only roll if dice count is sane or user confirms 1000+ roll
-                if (inDialog == false) {
-                    rollDice();
+                // Roll with <1000 dice count, so no loading display
+                if (inDialog[0] == false) {
+                    rollDice(false);
                 }
             }
         });
