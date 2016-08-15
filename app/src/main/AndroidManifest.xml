@@ -18,4 +18,11 @@
         </activity>
     </application>
 
+    <supports-screens
+        android:anyDensity="true"
+        android:xlargeScreens="true"
+        android:largeScreens="true"
+        android:normalScreens="true"
+        android:smallScreens="true" />
+
 </manifest>

@@ -224,6 +224,9 @@ public class MainActivity extends AppCompatActivity {
                 else {
                     tvResults.setText(simple, TextView.BufferType.SPANNABLE);
                 }
+                // Reset scroller to top, fixes bug where scrolling down on a large dice roll then doing
+                // a small roll would cause the results to disappear unless you scrolled up
+                tvResults.scrollTo(0,0);
 
                 // Handle success/botch display
                 successStr.clear();
