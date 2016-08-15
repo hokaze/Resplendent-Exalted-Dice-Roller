@@ -2,6 +2,8 @@ package com.hokaze.exaltedroller;
 
 import android.app.ProgressDialog;
 import android.content.DialogInterface;
+import android.content.pm.ActivityInfo;
+import android.content.res.Configuration;
 import android.graphics.Color;
 import android.graphics.Typeface;
 import android.support.v7.app.AlertDialog;
@@ -15,6 +17,7 @@ import android.text.Spanned;
 import android.text.method.ScrollingMovementMethod;
 import android.text.style.ForegroundColorSpan;
 import android.text.style.StyleSpan;
+import android.view.Surface;
 import android.view.View;
 import android.widget.Button;
 import android.widget.CheckBox;
@@ -104,6 +107,28 @@ public class MainActivity extends AppCompatActivity {
 
             // Roll dice in function so it can be called from onClick and the 1000+ dice alertdialog
             public void rollDice() {
+
+                // Temporarily lock screen rotation to current orientation, as rotating during the
+                //  progress dialog/thread run() can cause crashes.
+                // UPDATE: should now work properly with tablets
+                int rotation = getWindowManager().getDefaultDisplay().getRotation();
+                int tempOrientation = getResources().getConfiguration().orientation;
+                int orientation = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT;
+                switch(tempOrientation)
+                {
+                    case Configuration.ORIENTATION_LANDSCAPE:
+                        if(rotation == Surface.ROTATION_0 || rotation == Surface.ROTATION_90)
+                            orientation = ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE;
+                        else
+                            orientation = ActivityInfo.SCREEN_ORIENTATION_REVERSE_LANDSCAPE;
+                        break;
+                    case Configuration.ORIENTATION_PORTRAIT:
+                        if(rotation == Surface.ROTATION_0 || rotation == Surface.ROTATION_270)
+                            orientation = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT;
+                        else
+                            orientation = ActivityInfo.SCREEN_ORIENTATION_REVERSE_PORTRAIT;
+                }
+                setRequestedOrientation(orientation);
 
                 // Display loading spinner, mostly used for larger numbers of dice
                 final ProgressDialog loading = new ProgressDialog(MainActivity.this);
@@ -280,7 +305,9 @@ public class MainActivity extends AppCompatActivity {
                         } catch (Exception e) {
 
                         }
+                        // Close the loading dialog and unlock orientation, allowing rotations again
                         loading.dismiss();
+                        setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED);
                     }
                 }).start();
 
@@ -320,7 +347,7 @@ public class MainActivity extends AppCompatActivity {
                     final boolean[] rolling = {false};
                     new AlertDialog.Builder(MainActivity.this)
                             .setTitle("That's a LOT of d10s!")
-                            .setMessage("Are you sure you want to roll 500+ dice? This may cause lag on some devices.")
+                            .setMessage("Are you sure you want to roll 1000+ dice? This may cause lag on some devices.")
                             .setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
                                 public void onClick(DialogInterface dialog, int which) {
                                     // Roll dice despite large number, but show a loading spinner
