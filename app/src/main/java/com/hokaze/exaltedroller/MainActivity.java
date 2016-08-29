@@ -253,33 +253,37 @@ public class MainActivity extends AppCompatActivity {
                                 else {
                                     simple += String.valueOf(randomInt);
                                     simple += " ";
-                                    //tvResults.append(String.valueOf(randomInt));
-                                    //tvResults.append(" ");
                                 }
                             }
 
                             // Handle success/botch formatting
                             successStr.clear();
                             if (successes < 1 && botches > 0) {
-                                //tvSuccess.setText("Botches: ");
                                 // Display number of botches in BOLD
                                 successStr.append("Botches: ");
                                 SpannableString botchStr = new SpannableString(String.valueOf(botches));
                                 botchStr.setSpan(new StyleSpan(Typeface.BOLD), 0, botchStr.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+                                // If using coloured formatting, display in RED to make botches (instead of successes) more obvious
+                                if (checkColours.isChecked()) {
+                                    botchStr.setSpan(new ForegroundColorSpan(Color.rgb(200, 50, 50)), 0, botchStr.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+                                }
                                 successStr.append(botchStr);
-                                //tvSuccess.append(String.valueOf(botches));)
-                                //totalStr = new SpannableString(String.valueOf(botches));
-                                //tvSuccess.append(String.valueOf(botches));
                             }
                             else {
-                                //tvSuccess.setText("Successes: ");
                                 // Display number of successes in BOLD
                                 successStr.append("Successes: ");
                                 SpannableString succStr = new SpannableString(String.valueOf(successes));
                                 succStr.setSpan(new StyleSpan(Typeface.BOLD), 0, succStr.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+                                // If using coloured formatting, display in GREEN if successes, or BLUE if many successes
+                                if (checkColours.isChecked()) {
+                                    if (successes >= diceCount / 2) {
+                                        succStr.setSpan(new ForegroundColorSpan(Color.rgb(50, 50, 200)), 0, succStr.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+                                    }
+                                    else {
+                                        succStr.setSpan(new ForegroundColorSpan(Color.rgb(50, 200, 50)), 0, succStr.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+                                    }
+                                }
                                 successStr.append(succStr);
-                                //totalStr = new SpannableString(String.valueOf(successes));
-                                //tvSuccess.append(String.valueOf(successes));
                             }
 
                             // UPDATE UI
