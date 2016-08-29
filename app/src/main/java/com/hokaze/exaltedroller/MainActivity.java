@@ -40,9 +40,9 @@ public class MainActivity extends AppCompatActivity {
     static Random ranDice = new Random();
     ArrayList<String> trickList = new ArrayList<String>();
     boolean[] trickValues = new boolean[12]; // ugh, magic number for list size, need to declare early for save/restore
-    final SpannableStringBuilder builder = new SpannableStringBuilder("Results: ");
+    SpannableStringBuilder builder = new SpannableStringBuilder("Results: ");
     String simple = "Results: ";
-    final SpannableStringBuilder successStr = new SpannableStringBuilder("Successes: ");
+    SpannableStringBuilder successStr = new SpannableStringBuilder("Successes: ");
     int diceCount = 0;
 
     @Override
@@ -148,8 +148,13 @@ public class MainActivity extends AppCompatActivity {
 
                             // Prepare results view
                             if (checkColours.isChecked() == true) {
-                                builder.clear();
-                                builder.append("Results: ");
+                                // Creating a new SSB and letting the garbage collector discard the old one
+                                // seems to be faster than using .clear() on large data. This way fixes
+                                // the speed issue where rolling 1000+ dice would then cause a delay on the next
+                                // roll, causing even small rolls to require the loading screen.
+                                builder = new SpannableStringBuilder("Results: ");
+                                //builder.clear();
+                                //builder.append("Results: ");
                             }
                             else {
                                 simple = "Results: ";
@@ -257,7 +262,8 @@ public class MainActivity extends AppCompatActivity {
                             }
 
                             // Handle success/botch formatting
-                            successStr.clear();
+                            //successStr.clear();
+                            successStr = new SpannableStringBuilder();
                             if (successes < 1 && botches > 0) {
                                 // Display number of botches in BOLD
                                 successStr.append("Botches: ");
@@ -276,11 +282,14 @@ public class MainActivity extends AppCompatActivity {
                                 succStr.setSpan(new StyleSpan(Typeface.BOLD), 0, succStr.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
                                 // If using coloured formatting, display in GREEN if successes, or BLUE if many successes
                                 if (checkColours.isChecked()) {
-                                    if (successes >= diceCount / 2) {
-                                        succStr.setSpan(new ForegroundColorSpan(Color.rgb(50, 50, 200)), 0, succStr.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
-                                    }
-                                    else {
-                                        succStr.setSpan(new ForegroundColorSpan(Color.rgb(50, 200, 50)), 0, succStr.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+                                    // Without this IF, rolling 0 dice would trigger blue highlighting
+                                    if (diceCount > 0) {
+                                        if (successes >= diceCount / 2) {
+                                            succStr.setSpan(new ForegroundColorSpan(Color.rgb(50, 50, 200)), 0, succStr.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+                                        }
+                                        else {
+                                            succStr.setSpan(new ForegroundColorSpan(Color.rgb(50, 200, 50)), 0, succStr.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+                                        }
                                     }
                                 }
                                 successStr.append(succStr);
@@ -452,13 +461,15 @@ public class MainActivity extends AppCompatActivity {
         tvResults.setText(savedInstanceState.getString("ResultsString"));
         if (checkColours.isChecked()) {
             Spanned spanResults = Html.fromHtml(savedInstanceState.getString("SpanResultsString"));
-            builder.clear();
+            //builder.clear();
+            builder = new SpannableStringBuilder();
             builder.append(spanResults); // need this or multiple coloured rotations in a row lose data
             tvResults.setText(spanResults);
         }
         // Make successes/botches display the number in bold on reload
         Spanned spanSuccess = Html.fromHtml(savedInstanceState.getString("SuccessString"));
-        successStr.clear();
+        //successStr.clear();
+        successStr = new SpannableStringBuilder();
         successStr.append(spanSuccess);
         tvSuccess.setText(successStr);
     }
