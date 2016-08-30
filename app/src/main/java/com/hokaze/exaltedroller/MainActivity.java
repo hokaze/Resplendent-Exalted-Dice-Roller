@@ -46,7 +46,7 @@ public class MainActivity extends AppCompatActivity {
     String simple = "Results: ";
     //String htmlResults = "Results: "
     SpannableStringBuilder successStr = new SpannableStringBuilder("Successes: ");
-    int diceCount = 0;
+    int diceCount = 0, targetNumber = 7, doubleNumber = 11;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -167,8 +167,8 @@ public class MainActivity extends AppCompatActivity {
                             }
 
                             // Determine which numbers have success, doubles, rerolls, etc
-                            int targetNumber = 7;
-                            int doubleNumber = 11; // cannot get double successes unless double 10s/9s/8s/7s in effect
+                            targetNumber = 7;
+                            doubleNumber = 11; // cannot get double successes unless double 10s/9s/8s/7s in effect
                             ArrayList<Integer> rerollList = new ArrayList<Integer>();
                             boolean rerollAllowed = true; // Set to false for dice created by non-exploding reroll dice tricks
                             if (checkTens.isChecked()) {doubleNumber = 10;}
@@ -255,13 +255,13 @@ public class MainActivity extends AppCompatActivity {
                                     rerollAllowed = true;
                                 }
 
-                                // Display results with new coloured text for botch/success/doubles
+                                // Display results with coloured text for botch/success/doubles and bold for re-rolls
                                 if (checkColours.isChecked()) {
                                     SpannableString resultStr = new SpannableString(String.valueOf(randomInt));
                                     /*if (colour != Color.BLACK) {
                                         resultStr.setSpan(new ForegroundColorSpan(colour), 0, resultStr.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
                                     }*/
-                                    // If d10 triggered a reroll or explosion, use bold text
+                                    // If d10 triggered a re-roll or explosion, use bold text
                                     if (bold == true) {
                                         resultStr.setSpan(new StyleSpan(Typeface.BOLD), 0, resultStr.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
                                     }
@@ -280,24 +280,8 @@ public class MainActivity extends AppCompatActivity {
 
 
                             // Alternative colour formatting through regexing the spannablestringbuilder
-                            // ColourFormat: successes/doubles
-                            String regex = String.format("[%d-9]|10", targetNumber); // matches range of TN to 9 OR 10
-                            Pattern ptn = Pattern.compile(regex);
-                            Matcher matcher = ptn.matcher(builder.toString());
-                            while (matcher.find()) {
-                                ForegroundColorSpan span = new ForegroundColorSpan(Color.rgb(50, 200, 50));
-                                if (Integer.parseInt(matcher.group(0)) >= doubleNumber) {
-                                    span = new ForegroundColorSpan(Color.rgb(50, 50, 200)); // blue if 2 successes
-                                }
-                                builder.setSpan(span, matcher.start(), matcher.end(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
-                            }
-                            //  ColourFormat: botches
-                            regex = "1 ";
-                            ptn = Pattern.compile(regex);
-                            matcher = ptn.matcher(builder.toString());
-                            while (matcher.find()) {
-                                ForegroundColorSpan span = new ForegroundColorSpan(Color.rgb(200, 50, 50));
-                                builder.setSpan(span, matcher.start(), matcher.end(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+                            if (checkColours.isChecked()) {
+                                regexColours();
                             }
 
 
@@ -476,6 +460,30 @@ public class MainActivity extends AppCompatActivity {
         });
     }
 
+    // Alternative colour formatting through regexing the spannablestringbuilder
+    public void regexColours() {
+        // ColourFormat: successes/doubles
+        String regex = String.format("[%d-9]|10", targetNumber); // matches range of TN to 9 OR 10
+        Pattern ptn = Pattern.compile(regex);
+        Matcher matcher = ptn.matcher(builder.toString());
+        while (matcher.find()) {
+            ForegroundColorSpan span = new ForegroundColorSpan(Color.rgb(50, 200, 50));
+            if (Integer.parseInt(matcher.group(0)) >= doubleNumber) {
+                span = new ForegroundColorSpan(Color.rgb(50, 50, 200)); // blue if 2 successes
+            }
+            builder.setSpan(span, matcher.start(), matcher.end(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+        }
+        //  ColourFormat: botches
+        regex = "1 ";
+        ptn = Pattern.compile(regex);
+        matcher = ptn.matcher(builder.toString());
+        while (matcher.find()) {
+            ForegroundColorSpan span = new ForegroundColorSpan(Color.rgb(200, 50, 50));
+            builder.setSpan(span, matcher.start(), matcher.end(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+        }
+    }
+
+
     // Need to save and restore state below so that the dice tricks list and results textview
     // are not wiped clean upon screen rotation, which kinda kills usability somewhat
 
@@ -488,7 +496,9 @@ public class MainActivity extends AppCompatActivity {
         savedInstanceState.putBooleanArray("DiceTrickValues", trickValues);
         savedInstanceState.putString("ResultsString", tvResults.getText().toString()); // plain string, no formatting
         if (checkColours.isChecked()) {
-            savedInstanceState.putString("SpanResultsString", Html.toHtml(builder)); // convert to html so we can save formatting
+            savedInstanceState.putInt("TargetNumber", targetNumber);
+            savedInstanceState.putInt("DoubleNumber", doubleNumber);
+            //savedInstanceState.putString("SpanResultsString", Html.toHtml(builder)); // convert to html so we can save formatting
         }
         savedInstanceState.putString("SuccessString", Html.toHtml(successStr));
     }
@@ -499,14 +509,20 @@ public class MainActivity extends AppCompatActivity {
         // Restore UI state from the savedInstanceState.
         // This bundle has also been passed to onCreate.
         trickValues = savedInstanceState.getBooleanArray("DiceTrickValues");
-        // Load results in plan or formatted text
-        tvResults.setText(savedInstanceState.getString("ResultsString"));
+        // Load results in plain or formatted text
         if (checkColours.isChecked()) {
-            Spanned spanResults = Html.fromHtml(savedInstanceState.getString("SpanResultsString"));
+            targetNumber = savedInstanceState.getInt("TargetNumber");
+            doubleNumber = savedInstanceState.getInt("DoubleNumber");
+            //Spanned spanResults = Html.fromHtml(savedInstanceState.getString("SpanResultsString"));
             //builder.clear();
             builder = new SpannableStringBuilder();
-            builder.append(spanResults); // need this or multiple coloured rotations in a row lose data
-            tvResults.setText(spanResults);
+            //builder.append(spanResults); // need this or multiple coloured rotations in a row lose data
+            builder.append(savedInstanceState.getString("ResultsString"));
+            regexColours();
+            tvResults.setText(builder);
+        }
+        else {
+            tvResults.setText(savedInstanceState.getString("ResultsString"));
         }
         // Make successes/botches display the number in bold on reload
         Spanned spanSuccess = Html.fromHtml(savedInstanceState.getString("SuccessString"));
