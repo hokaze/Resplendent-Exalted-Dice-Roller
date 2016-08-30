@@ -258,14 +258,18 @@ public class MainActivity extends AppCompatActivity {
                                 // Display results with coloured text for botch/success/doubles and bold for re-rolls
                                 if (checkColours.isChecked()) {
                                     SpannableString resultStr = new SpannableString(String.valueOf(randomInt));
+                                    // Old formatting code
                                     /*if (colour != Color.BLACK) {
                                         resultStr.setSpan(new ForegroundColorSpan(colour), 0, resultStr.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
-                                    }*/
+                                    }
                                     // If d10 triggered a re-roll or explosion, use bold text
                                     if (bold == true) {
                                         resultStr.setSpan(new StyleSpan(Typeface.BOLD), 0, resultStr.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
-                                    }
+                                    }*/
                                     builder.append(resultStr);
+                                    if (bold == true) {
+                                        builder.append("r");
+                                    }
                                     builder.append(" ");
 
                                     // Alternative formatting using html...definitely slower for large rolls
@@ -274,14 +278,17 @@ public class MainActivity extends AppCompatActivity {
                                 }
                                 else {
                                     simple += String.valueOf(randomInt);
+                                    if (bold == true) {
+                                        simple += "r"; // indicate rerolls without bold text
+                                    }
                                     simple += " ";
                                 }
                             }
 
 
-                            // Alternative colour formatting through regexing the spannablestringbuilder
+                            // Alternative formatting for results by regexing the spannablestringbuilder
                             if (checkColours.isChecked()) {
-                                regexColours();
+                                regexResults();
                             }
 
 
@@ -460,26 +467,38 @@ public class MainActivity extends AppCompatActivity {
         });
     }
 
-    // Alternative colour formatting through regexing the spannablestringbuilder
-    public void regexColours() {
-        // ColourFormat: successes/doubles
+    // Alternative formatting for results by regexing the spannablestringbuilder
+    public void regexResults() {
+        // Colour/Bold: successes/doubles
         String regex = String.format("[%d-9]|10", targetNumber); // matches range of TN to 9 OR 10
         Pattern ptn = Pattern.compile(regex);
         Matcher matcher = ptn.matcher(builder.toString());
         while (matcher.find()) {
-            ForegroundColorSpan span = new ForegroundColorSpan(Color.rgb(50, 200, 50));
+            ForegroundColorSpan spanC = new ForegroundColorSpan(Color.rgb(50, 200, 50));
             if (Integer.parseInt(matcher.group(0)) >= doubleNumber) {
-                span = new ForegroundColorSpan(Color.rgb(50, 50, 200)); // blue if 2 successes
+                spanC = new ForegroundColorSpan(Color.rgb(50, 50, 200)); // blue if 2 successes
             }
-            builder.setSpan(span, matcher.start(), matcher.end(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+            builder.setSpan(spanC, matcher.start(), matcher.end()+1, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE); // +1 to include "r" if appropriate
+            StyleSpan spanB = new StyleSpan(Typeface.BOLD);
+            builder.setSpan(spanB, matcher.start(), matcher.end()+1, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
         }
-        //  ColourFormat: botches
-        regex = "1 ";
+        // Colour/Bold: botches
+        regex = "1r|1 ";
         ptn = Pattern.compile(regex);
         matcher = ptn.matcher(builder.toString());
         while (matcher.find()) {
-            ForegroundColorSpan span = new ForegroundColorSpan(Color.rgb(200, 50, 50));
-            builder.setSpan(span, matcher.start(), matcher.end(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+            ForegroundColorSpan spanC = new ForegroundColorSpan(Color.rgb(200, 50, 50));
+            builder.setSpan(spanC, matcher.start(), matcher.end(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+            StyleSpan spanB = new StyleSpan(Typeface.BOLD);
+            builder.setSpan(spanB, matcher.start(), matcher.end(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+        }
+        // Italics/Bold: rerolls
+        regex = "[1-9]r|10r";
+        ptn = Pattern.compile(regex);
+        matcher = ptn.matcher(builder.toString());
+        while (matcher.find()) {
+            StyleSpan spanBI = new StyleSpan(Typeface.BOLD_ITALIC);
+            builder.setSpan(spanBI, matcher.start(), matcher.end(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
         }
     }
 
@@ -495,11 +514,11 @@ public class MainActivity extends AppCompatActivity {
         // killed and restarted.
         savedInstanceState.putBooleanArray("DiceTrickValues", trickValues);
         savedInstanceState.putString("ResultsString", tvResults.getText().toString()); // plain string, no formatting
-        if (checkColours.isChecked()) {
-            savedInstanceState.putInt("TargetNumber", targetNumber);
-            savedInstanceState.putInt("DoubleNumber", doubleNumber);
-            //savedInstanceState.putString("SpanResultsString", Html.toHtml(builder)); // convert to html so we can save formatting
-        }
+        savedInstanceState.putInt("TargetNumber", targetNumber);
+        savedInstanceState.putInt("DoubleNumber", doubleNumber);
+        /*if (checkColours.isChecked()) {
+            savedInstanceState.putString("SpanResultsString", Html.toHtml(builder)); // convert to html so we can save formatting
+        }*/
         savedInstanceState.putString("SuccessString", Html.toHtml(successStr));
     }
 
@@ -509,26 +528,27 @@ public class MainActivity extends AppCompatActivity {
         // Restore UI state from the savedInstanceState.
         // This bundle has also been passed to onCreate.
         trickValues = savedInstanceState.getBooleanArray("DiceTrickValues");
-        // Load results in plain or formatted text
-        if (checkColours.isChecked()) {
-            targetNumber = savedInstanceState.getInt("TargetNumber");
-            doubleNumber = savedInstanceState.getInt("DoubleNumber");
-            //Spanned spanResults = Html.fromHtml(savedInstanceState.getString("SpanResultsString"));
-            //builder.clear();
-            builder = new SpannableStringBuilder();
-            //builder.append(spanResults); // need this or multiple coloured rotations in a row lose data
-            builder.append(savedInstanceState.getString("ResultsString"));
-            regexColours();
-            tvResults.setText(builder);
-        }
-        else {
-            tvResults.setText(savedInstanceState.getString("ResultsString"));
-        }
+        targetNumber = savedInstanceState.getInt("TargetNumber");
+        doubleNumber = savedInstanceState.getInt("DoubleNumber");
         // Make successes/botches display the number in bold on reload
         Spanned spanSuccess = Html.fromHtml(savedInstanceState.getString("SuccessString"));
         //successStr.clear();
         successStr = new SpannableStringBuilder();
         successStr.append(spanSuccess);
-        tvSuccess.setText(successStr);
+        // Load results in plain or formatted text
+        if (checkColours.isChecked()) {
+            //Spanned spanResults = Html.fromHtml(savedInstanceState.getString("SpanResultsString"));
+            //builder.clear();
+            builder = new SpannableStringBuilder();
+            //builder.append(spanResults); // need this or multiple coloured rotations in a row lose data
+            builder.append(savedInstanceState.getString("ResultsString"));
+            regexResults();
+            tvResults.setText(builder);
+            tvSuccess.setText(successStr);
+        }
+        else {
+            tvResults.setText(savedInstanceState.getString("ResultsString"));
+            tvSuccess.setText(successStr.toString());
+        }
     }
 }
