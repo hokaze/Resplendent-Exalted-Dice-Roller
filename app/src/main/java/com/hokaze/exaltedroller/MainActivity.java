@@ -41,7 +41,7 @@ public class MainActivity extends AppCompatActivity {
     CheckBox checkColours, checkTens, checkBotches, checkEx3;
     Random ranDice = new Random();
     ArrayList<String> trickList = new ArrayList<String>();
-    boolean[] trickValues = new boolean[12]; // ugh, magic number for list size, need to declare early for save/restore
+    boolean[] trickValues = new boolean[11]; // ugh, magic number for list size, need to declare early for save/restore
     SpannableStringBuilder builder = new SpannableStringBuilder("Results: ");
     String simple = "Results: ";
     //String htmlResults = "Results: "
@@ -438,7 +438,77 @@ public class MainActivity extends AppCompatActivity {
 
                 // Setup dialog using setMutliChoiceItem method to enable checkboxes
                 builderDialog.setMultiChoiceItems(dialogList, trickValues, new DialogInterface.OnMultiChoiceClickListener() {
-                            public void onClick(DialogInterface dialog, int whichButton, boolean trickValues) {
+                            // Set on click of some options to auto-enable others: no functional change but makes
+                            // the UI and the results more obvious to users
+                            @Override
+                            public void onClick(DialogInterface dialog, int whichButton, boolean isChecked) {
+                                ListView list = ((AlertDialog) dialog).getListView();
+                                // Disabling double 9s will disable doubles 8s and 7s in the UI
+                                if (whichButton == 0) {
+                                    if (list.isItemChecked(0)) {
+                                        // do nothing
+                                    }
+                                    else {
+                                        trickValues[1] = false;
+                                        list.setItemChecked(1, false);
+                                        trickValues[2] = false;
+                                        list.setItemChecked(2, false);
+                                    }
+                                }
+                                // Setting double 8s and above sets double 9s in the UI
+                                if (whichButton == 1) {
+                                    if (list.isItemChecked(1)) {
+                                        trickValues[0] = true;
+                                        list.setItemChecked(0, true);
+                                    }
+                                    // Disabling double 8s will disable double 9s if applicable
+                                    else {
+                                        trickValues[2] = false;
+                                        list.setItemChecked(2, false);
+                                    }
+                                }
+                                // Setting double 7s and above sets double 8s and 9s in the UI
+                                if (whichButton == 2) {
+                                    if (list.isItemChecked(2)) {
+                                        trickValues[0] = true;
+                                        list.setItemChecked(0, true);
+                                        trickValues[1] = true;
+                                        list.setItemChecked(1, true);
+                                    }
+                                }
+                                // Disabling TN 6 will disable TN 5 and TN 4 in the UI
+                                if (whichButton == 8) {
+                                    if (list.isItemChecked(8)) {
+                                        // do nothing
+                                    }
+                                    else {
+                                        trickValues[9] = false;
+                                        list.setItemChecked(9, false);
+                                        trickValues[10] = false;
+                                        list.setItemChecked(10, false);
+                                    }
+                                }
+                                // Setting TN 5s and above sets TN 6
+                                if (whichButton == 9) {
+                                    if (list.isItemChecked(9)) {
+                                        trickValues[8] = true;
+                                        list.setItemChecked(8, true);
+                                    }
+                                    // Disabling TN 5s will disable TN 4 if applicable
+                                    else {
+                                        trickValues[10] = false;
+                                        list.setItemChecked(10, false);
+                                    }
+                                }
+                                // Setting TN 4s and above sets TN 5 and TN 6
+                                if (whichButton == 10) {
+                                    if (list.isItemChecked(10)) {
+                                        trickValues[8] = true;
+                                        list.setItemChecked(8, true);
+                                        trickValues[9] = true;
+                                        list.setItemChecked(9, true);
+                                    }
+                                }
                             }
                         });
 
