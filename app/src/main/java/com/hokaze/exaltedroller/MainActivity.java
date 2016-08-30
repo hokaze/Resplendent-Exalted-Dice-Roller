@@ -37,11 +37,12 @@ public class MainActivity extends AppCompatActivity {
     EditText etDice;
     TextView tvResults, tvSuccess;
     CheckBox checkColours, checkTens, checkBotches, checkEx3;
-    static Random ranDice = new Random();
+    Random ranDice = new Random();
     ArrayList<String> trickList = new ArrayList<String>();
     boolean[] trickValues = new boolean[12]; // ugh, magic number for list size, need to declare early for save/restore
     SpannableStringBuilder builder = new SpannableStringBuilder("Results: ");
     String simple = "Results: ";
+    //String htmlResults = "Results: "
     SpannableStringBuilder successStr = new SpannableStringBuilder("Successes: ");
     int diceCount = 0;
 
@@ -153,8 +154,11 @@ public class MainActivity extends AppCompatActivity {
                                 // the speed issue where rolling 1000+ dice would then cause a delay on the next
                                 // roll, causing even small rolls to require the loading screen.
                                 builder = new SpannableStringBuilder("Results: ");
-                                //builder.clear();
-                                //builder.append("Results: ");
+                                builder.clear();
+                                builder.append("Results: ");
+
+                                // Alternative formatting using html
+                                //htmlResults = "Results: ";
                             }
                             else {
                                 simple = "Results: ";
@@ -194,17 +198,20 @@ public class MainActivity extends AppCompatActivity {
                             for (int i = 0; i < diceCount; ++i){
                                 int randomInt = ranDice.nextInt(10)+1;
                                 int colour = Color.BLACK;
+                                //String htmlColour = "\"#000000\"";
                                 boolean bold = false;
 
                                 // Success
                                 if (randomInt >= targetNumber) {
                                     ++successes;
                                     colour = Color.rgb(50, 200, 50); // A green that isn't as painfully bright as Color.GREEN
+                                    //htmlColour = "\"#32c832\"";
 
                                     // Check if the number has double successes
                                     if (randomInt >= doubleNumber) {
                                         ++successes;
                                         colour = Color.rgb(50, 50, 200); // Blue
+                                        //htmlColour = "\"#3232c8\"";
                                     }
                                 }
 
@@ -214,6 +221,8 @@ public class MainActivity extends AppCompatActivity {
                                     if (randomInt == 1) {
                                         ++botches;
                                         colour = Color.rgb(200, 50, 50); // Red, less blinding than Color.RED
+                                        //htmlColour = "\"#c83232\"";
+
                                         // Some Systems have botches subtract successes
                                         if (checkBotches.isChecked()) {
                                             --successes;
@@ -223,9 +232,9 @@ public class MainActivity extends AppCompatActivity {
 
                                 // Check for exploding dice or rerolls
                                 if (rerollAllowed == true && rerollList.size() > 0) {
-                                    for (int j = 0; j < rerollList.size(); ++j) {
-                                        // Primitive infinite reroller
-                                        if (randomInt == rerollList.get(j)) {
+                                    // Re-roll with enhanced for loop for slightly faster performance
+                                    for (Integer d : rerollList) {
+                                        if (randomInt == d) {
                                             --i;
                                             bold = true;
                                             // Only 10s may explode ad infinatum
@@ -254,6 +263,10 @@ public class MainActivity extends AppCompatActivity {
                                     }
                                     builder.append(resultStr);
                                     builder.append(" ");
+
+                                    // Alternative formatting using html...definitely slower for large rolls
+                                    //htmlResults += "<font color =" + htmlColour + ">" + String.valueOf(randomInt) + "</font> ";
+
                                 }
                                 else {
                                     simple += String.valueOf(randomInt);
@@ -302,6 +315,7 @@ public class MainActivity extends AppCompatActivity {
                                     // Use colours and formatted text if enabled
                                     if (checkColours.isChecked()) {
                                         tvResults.setText(builder, TextView.BufferType.SPANNABLE);
+                                        //tvResults.setText(Html.fromHtml(htmlResults));
                                     }
                                     else {
                                         tvResults.setText(simple, TextView.BufferType.SPANNABLE);
