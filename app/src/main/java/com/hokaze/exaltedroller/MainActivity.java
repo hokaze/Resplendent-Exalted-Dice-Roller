@@ -31,6 +31,8 @@ import com.google.android.gms.ads.AdView;
 
 import java.util.ArrayList;
 import java.util.Random;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class MainActivity extends AppCompatActivity {
     Button bRoll, bTricks;
@@ -197,20 +199,20 @@ public class MainActivity extends AppCompatActivity {
                             // Loop through dice rolled
                             for (int i = 0; i < diceCount; ++i){
                                 int randomInt = ranDice.nextInt(10)+1;
-                                int colour = Color.BLACK;
+                                //int colour = Color.BLACK;
                                 //String htmlColour = "\"#000000\"";
                                 boolean bold = false;
 
                                 // Success
                                 if (randomInt >= targetNumber) {
                                     ++successes;
-                                    colour = Color.rgb(50, 200, 50); // A green that isn't as painfully bright as Color.GREEN
+                                    //colour = Color.rgb(50, 200, 50); // A green that isn't as painfully bright as Color.GREEN
                                     //htmlColour = "\"#32c832\"";
 
                                     // Check if the number has double successes
                                     if (randomInt >= doubleNumber) {
                                         ++successes;
-                                        colour = Color.rgb(50, 50, 200); // Blue
+                                        //colour = Color.rgb(50, 50, 200); // Blue
                                         //htmlColour = "\"#3232c8\"";
                                     }
                                 }
@@ -220,7 +222,7 @@ public class MainActivity extends AppCompatActivity {
                                     // Botch
                                     if (randomInt == 1) {
                                         ++botches;
-                                        colour = Color.rgb(200, 50, 50); // Red, less blinding than Color.RED
+                                        //colour = Color.rgb(200, 50, 50); // Red, less blinding than Color.RED
                                         //htmlColour = "\"#c83232\"";
 
                                         // Some Systems have botches subtract successes
@@ -256,7 +258,9 @@ public class MainActivity extends AppCompatActivity {
                                 // Display results with new coloured text for botch/success/doubles
                                 if (checkColours.isChecked()) {
                                     SpannableString resultStr = new SpannableString(String.valueOf(randomInt));
-                                    resultStr.setSpan(new ForegroundColorSpan(colour), 0, resultStr.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+                                    /*if (colour != Color.BLACK) {
+                                        resultStr.setSpan(new ForegroundColorSpan(colour), 0, resultStr.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+                                    }*/
                                     // If d10 triggered a reroll or explosion, use bold text
                                     if (bold == true) {
                                         resultStr.setSpan(new StyleSpan(Typeface.BOLD), 0, resultStr.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
@@ -273,6 +277,29 @@ public class MainActivity extends AppCompatActivity {
                                     simple += " ";
                                 }
                             }
+
+
+                            // Alternative colour formatting through regexing the spannablestringbuilder
+                            // ColourFormat: successes/doubles
+                            String regex = String.format("[%d-9]|10", targetNumber); // matches range of TN to 9 OR 10
+                            Pattern ptn = Pattern.compile(regex);
+                            Matcher matcher = ptn.matcher(builder.toString());
+                            while (matcher.find()) {
+                                ForegroundColorSpan span = new ForegroundColorSpan(Color.rgb(50, 200, 50));
+                                if (Integer.parseInt(matcher.group(0)) >= doubleNumber) {
+                                    span = new ForegroundColorSpan(Color.rgb(50, 50, 200)); // blue if 2 successes
+                                }
+                                builder.setSpan(span, matcher.start(), matcher.end(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+                            }
+                            //  ColourFormat: botches
+                            regex = "1 ";
+                            ptn = Pattern.compile(regex);
+                            matcher = ptn.matcher(builder.toString());
+                            while (matcher.find()) {
+                                ForegroundColorSpan span = new ForegroundColorSpan(Color.rgb(200, 50, 50));
+                                builder.setSpan(span, matcher.start(), matcher.end(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+                            }
+
 
                             // Handle success/botch formatting
                             //successStr.clear();
@@ -295,14 +322,15 @@ public class MainActivity extends AppCompatActivity {
                                 succStr.setSpan(new StyleSpan(Typeface.BOLD), 0, succStr.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
                                 // If using coloured formatting, display in GREEN if successes, or BLUE if many successes
                                 if (checkColours.isChecked()) {
-                                    // Without this IF, rolling 0 dice would trigger blue highlighting
-                                    if (diceCount > 0) {
-                                        if (successes >= diceCount / 2) {
-                                            succStr.setSpan(new ForegroundColorSpan(Color.rgb(50, 50, 200)), 0, succStr.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
-                                        }
-                                        else {
-                                            succStr.setSpan(new ForegroundColorSpan(Color.rgb(50, 200, 50)), 0, succStr.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
-                                        }
+                                    if (successes >= diceCount / 2) {
+                                        succStr.setSpan(new ForegroundColorSpan(Color.rgb(50, 50, 200)), 0, succStr.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+                                    }
+                                    else {
+                                        succStr.setSpan(new ForegroundColorSpan(Color.rgb(50, 200, 50)), 0, succStr.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+                                    }
+                                    // Should probably be RED if we don't botch but get 0 successes...
+                                    if (successes < 1) {
+                                        succStr.setSpan(new ForegroundColorSpan(Color.rgb(200, 50, 50)), 0, succStr.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
                                     }
                                 }
                                 successStr.append(succStr);
