@@ -44,7 +44,6 @@ public class MainActivity extends AppCompatActivity {
     boolean[] trickValues = new boolean[11]; // ugh, magic number for list size, need to declare early for save/restore
     SpannableStringBuilder builder = new SpannableStringBuilder("Results: ");
     String simple = "Results: ";
-    //String htmlResults = "Results: "
     SpannableStringBuilder successStr = new SpannableStringBuilder("Successes: ");
     int diceCount = 0, targetNumber = 7, doubleNumber = 11;
 
@@ -97,9 +96,6 @@ public class MainActivity extends AppCompatActivity {
         etDice.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                //etDice.clearFocus();
-                //etDice.requestFocus();
-                //etDice.clearFocus();
                 etDice.setText(etDice.getText());
                 etDice.selectAll();
             }
@@ -158,9 +154,6 @@ public class MainActivity extends AppCompatActivity {
                                 builder = new SpannableStringBuilder("Results: ");
                                 builder.clear();
                                 builder.append("Results: ");
-
-                                // Alternative formatting using html
-                                //htmlResults = "Results: ";
                             }
                             else {
                                 simple = "Results: ";
@@ -199,21 +192,15 @@ public class MainActivity extends AppCompatActivity {
                             // Loop through dice rolled
                             for (int i = 0; i < diceCount; ++i){
                                 int randomInt = ranDice.nextInt(10)+1;
-                                //int colour = Color.BLACK;
-                                //String htmlColour = "\"#000000\"";
                                 boolean bold = false;
 
                                 // Success
                                 if (randomInt >= targetNumber) {
                                     ++successes;
-                                    //colour = Color.rgb(50, 200, 50); // A green that isn't as painfully bright as Color.GREEN
-                                    //htmlColour = "\"#32c832\"";
 
                                     // Check if the number has double successes
                                     if (randomInt >= doubleNumber) {
                                         ++successes;
-                                        //colour = Color.rgb(50, 50, 200); // Blue
-                                        //htmlColour = "\"#3232c8\"";
                                     }
                                 }
 
@@ -222,8 +209,6 @@ public class MainActivity extends AppCompatActivity {
                                     // Botch
                                     if (randomInt == 1) {
                                         ++botches;
-                                        //colour = Color.rgb(200, 50, 50); // Red, less blinding than Color.RED
-                                        //htmlColour = "\"#c83232\"";
 
                                         // Some Systems have botches subtract successes
                                         if (checkBotches.isChecked()) {
@@ -258,22 +243,12 @@ public class MainActivity extends AppCompatActivity {
                                 // Display results with coloured text for botch/success/doubles and bold for re-rolls
                                 if (checkColours.isChecked()) {
                                     SpannableString resultStr = new SpannableString(String.valueOf(randomInt));
-                                    // Old formatting code
-                                    /*if (colour != Color.BLACK) {
-                                        resultStr.setSpan(new ForegroundColorSpan(colour), 0, resultStr.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
-                                    }
-                                    // If d10 triggered a re-roll or explosion, use bold text
-                                    if (bold == true) {
-                                        resultStr.setSpan(new StyleSpan(Typeface.BOLD), 0, resultStr.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
-                                    }*/
+
                                     builder.append(resultStr);
                                     if (bold == true) {
                                         builder.append("r");
                                     }
                                     builder.append(" ");
-
-                                    // Alternative formatting using html...definitely slower for large rolls
-                                    //htmlResults += "<font color =" + htmlColour + ">" + String.valueOf(randomInt) + "</font> ";
 
                                 }
                                 else {
@@ -293,7 +268,6 @@ public class MainActivity extends AppCompatActivity {
 
 
                             // Handle success/botch formatting
-                            //successStr.clear();
                             successStr = new SpannableStringBuilder();
                             if (successes < 1 && botches > 0) {
                                 // Display number of botches in BOLD
@@ -336,7 +310,6 @@ public class MainActivity extends AppCompatActivity {
                                     // Use colours and formatted text if enabled
                                     if (checkColours.isChecked()) {
                                         tvResults.setText(builder, TextView.BufferType.SPANNABLE);
-                                        //tvResults.setText(Html.fromHtml(htmlResults));
                                     }
                                     else {
                                         tvResults.setText(simple, TextView.BufferType.SPANNABLE);
@@ -371,7 +344,7 @@ public class MainActivity extends AppCompatActivity {
                     diceCount = Integer.parseInt(etDice.getText().toString());
                 }
                 catch (NumberFormatException nfe) {
-                    //Toast.makeText(MainActivity.this, "Please enter a valid number of d10s to roll.", Toast.LENGTH_SHORT).show();
+                    // do nothing
                 }
 
                 // User is taking the piss with dice and an arbitrary dice cap is enforced
@@ -551,8 +524,6 @@ public class MainActivity extends AppCompatActivity {
                 spanC = new ForegroundColorSpan(Color.rgb(50, 50, 200)); // blue if 2 successes
             }
             builder.setSpan(spanC, matcher.start(), matcher.end()+1, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE); // +1 to include "r" if appropriate
-            //StyleSpan spanB = new StyleSpan(Typeface.BOLD);
-            //builder.setSpan(spanB, matcher.start(), matcher.end()+1, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
         }
         // Red: botches
         regex = "1r|1 ";
@@ -561,8 +532,6 @@ public class MainActivity extends AppCompatActivity {
         while (matcher.find()) {
             ForegroundColorSpan spanC = new ForegroundColorSpan(Color.rgb(200, 50, 50));
             builder.setSpan(spanC, matcher.start(), matcher.end(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
-            //StyleSpan spanB = new StyleSpan(Typeface.BOLD);
-            //builder.setSpan(spanB, matcher.start(), matcher.end(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
         }
         // Italics: rerolls
         regex = "[1-9]r|10r";
@@ -588,9 +557,6 @@ public class MainActivity extends AppCompatActivity {
         savedInstanceState.putString("ResultsString", tvResults.getText().toString()); // plain string, no formatting
         savedInstanceState.putInt("TargetNumber", targetNumber);
         savedInstanceState.putInt("DoubleNumber", doubleNumber);
-        /*if (checkColours.isChecked()) {
-            savedInstanceState.putString("SpanResultsString", Html.toHtml(builder)); // convert to html so we can save formatting
-        }*/
         savedInstanceState.putString("SuccessString", Html.toHtml(successStr));
     }
 
@@ -604,15 +570,11 @@ public class MainActivity extends AppCompatActivity {
         doubleNumber = savedInstanceState.getInt("DoubleNumber");
         // Make successes/botches display the number in bold on reload
         Spanned spanSuccess = Html.fromHtml(savedInstanceState.getString("SuccessString"));
-        //successStr.clear();
         successStr = new SpannableStringBuilder();
         successStr.append(spanSuccess);
         // Load results in plain or formatted text
         if (checkColours.isChecked()) {
-            //Spanned spanResults = Html.fromHtml(savedInstanceState.getString("SpanResultsString"));
-            //builder.clear();
             builder = new SpannableStringBuilder();
-            //builder.append(spanResults); // need this or multiple coloured rotations in a row lose data
             builder.append(savedInstanceState.getString("ResultsString"));
             regexResults();
             tvResults.setText(builder);
