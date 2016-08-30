@@ -313,15 +313,17 @@ public class MainActivity extends AppCompatActivity {
                                 succStr.setSpan(new StyleSpan(Typeface.BOLD), 0, succStr.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
                                 // If using coloured formatting, display in GREEN if successes, or BLUE if many successes
                                 if (checkColours.isChecked()) {
-                                    if (successes >= diceCount / 2) {
-                                        succStr.setSpan(new ForegroundColorSpan(Color.rgb(50, 50, 200)), 0, succStr.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
-                                    }
-                                    else {
-                                        succStr.setSpan(new ForegroundColorSpan(Color.rgb(50, 200, 50)), 0, succStr.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
-                                    }
                                     // Should probably be RED if we don't botch but get 0 successes...
                                     if (successes < 1) {
                                         succStr.setSpan(new ForegroundColorSpan(Color.rgb(200, 50, 50)), 0, succStr.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+                                    }
+                                    else {
+                                        if (successes >= diceCount / 2) {
+                                            succStr.setSpan(new ForegroundColorSpan(Color.rgb(50, 50, 200)), 0, succStr.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+                                        }
+                                        else {
+                                            succStr.setSpan(new ForegroundColorSpan(Color.rgb(50, 200, 50)), 0, succStr.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+                                        }
                                     }
                                 }
                                 successStr.append(succStr);
@@ -469,7 +471,7 @@ public class MainActivity extends AppCompatActivity {
 
     // Alternative formatting for results by regexing the spannablestringbuilder
     public void regexResults() {
-        // Colour/Bold: successes/doubles
+        // Green/Blue: successes/doubles
         String regex = String.format("[%d-9]|10", targetNumber); // matches range of TN to 9 OR 10
         Pattern ptn = Pattern.compile(regex);
         Matcher matcher = ptn.matcher(builder.toString());
@@ -479,26 +481,26 @@ public class MainActivity extends AppCompatActivity {
                 spanC = new ForegroundColorSpan(Color.rgb(50, 50, 200)); // blue if 2 successes
             }
             builder.setSpan(spanC, matcher.start(), matcher.end()+1, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE); // +1 to include "r" if appropriate
-            StyleSpan spanB = new StyleSpan(Typeface.BOLD);
-            builder.setSpan(spanB, matcher.start(), matcher.end()+1, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+            //StyleSpan spanB = new StyleSpan(Typeface.BOLD);
+            //builder.setSpan(spanB, matcher.start(), matcher.end()+1, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
         }
-        // Colour/Bold: botches
+        // Red: botches
         regex = "1r|1 ";
         ptn = Pattern.compile(regex);
         matcher = ptn.matcher(builder.toString());
         while (matcher.find()) {
             ForegroundColorSpan spanC = new ForegroundColorSpan(Color.rgb(200, 50, 50));
             builder.setSpan(spanC, matcher.start(), matcher.end(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
-            StyleSpan spanB = new StyleSpan(Typeface.BOLD);
-            builder.setSpan(spanB, matcher.start(), matcher.end(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+            //StyleSpan spanB = new StyleSpan(Typeface.BOLD);
+            //builder.setSpan(spanB, matcher.start(), matcher.end(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
         }
-        // Italics/Bold: rerolls
+        // Italics: rerolls
         regex = "[1-9]r|10r";
         ptn = Pattern.compile(regex);
         matcher = ptn.matcher(builder.toString());
         while (matcher.find()) {
-            StyleSpan spanBI = new StyleSpan(Typeface.BOLD_ITALIC);
-            builder.setSpan(spanBI, matcher.start(), matcher.end(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+            StyleSpan spanI = new StyleSpan(Typeface.ITALIC);
+            builder.setSpan(spanI, matcher.start(), matcher.end(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
         }
     }
 
