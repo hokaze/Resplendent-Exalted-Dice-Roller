@@ -11,5 +11,5 @@
     <string name="colour_highlighting">Colour highlighting</string>
 
     <!-- AdMob ad unit IDs -->
-    <string name="banner_ad">ca-app-pub-0664570763252260/3326522424</string>
+    <string name="banner_ad_unit_id"> ca-app-pub-3891762784020205/7005607976</string>
 </resources>

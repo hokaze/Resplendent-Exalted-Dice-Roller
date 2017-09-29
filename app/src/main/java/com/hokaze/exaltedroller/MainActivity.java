@@ -28,6 +28,7 @@ import android.widget.TextView;
 import com.google.android.gms.ads.MobileAds;
 import com.google.android.gms.ads.AdRequest;
 import com.google.android.gms.ads.AdView;
+import com.google.firebase.analytics.FirebaseAnalytics;
 
 import java.util.ArrayList;
 import java.util.Random;
@@ -35,6 +36,10 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class MainActivity extends AppCompatActivity {
+
+    private AdView mAdView;
+    private FirebaseAnalytics mFirebaseAnalytics;
+
     Button bRoll, bTricks;
     EditText etDice;
     TextView tvResults, tvSuccess;
@@ -53,7 +58,10 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
 
         // Initialise ads api at launch to minimise latency of requests
-        MobileAds.initialize(getApplicationContext(), "ca-app-pub-3891762784020205/7005607976");
+        //MobileAds.initialize(getApplicationContext(), "ca-app-pub-3891762784020205/7005607976");
+
+        // Obtain the FirebaseAnalytics instance.
+        mFirebaseAnalytics = FirebaseAnalytics.getInstance(this);
 
         bRoll=(Button)findViewById(R.id.rollButton);
         bTricks=(Button)findViewById(R.id.tricksButton);
