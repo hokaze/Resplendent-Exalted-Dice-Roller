@@ -2,10 +2,12 @@ package com.hokaze.exaltedroller;
 
 import android.app.ProgressDialog;
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.content.pm.ActivityInfo;
 import android.content.res.Configuration;
 import android.graphics.Color;
 import android.graphics.Typeface;
+import android.net.Uri;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -37,7 +39,7 @@ public class MainActivity extends AppCompatActivity {
 
     private FirebaseAnalytics mFirebaseAnalytics;
 
-    Button bRoll, bTricks;
+    Button bRoll, bTricks, bBuyDrink;
     EditText etDice;
     TextView tvResults, tvSuccess;
     CheckBox checkColours, checkTens, checkBotches, checkEx3,
@@ -70,6 +72,16 @@ public class MainActivity extends AppCompatActivity {
         checkTens=(CheckBox)findViewById(R.id.doubleTens);
         checkBotches=(CheckBox)findViewById(R.id.botchesSubtract);
         checkEx3=(CheckBox)findViewById(R.id.enableEx3);
+
+        // Instead of ads, people can now donate to me by "buying me a drink"
+        bBuyDrink=(Button)findViewById(R.id.buyDrinkButton);
+        bBuyDrink.setOnClickListener(new View.OnClickListener() {
+            public void onClick(View v) {
+                Intent donateLink = new Intent(android.content.Intent.ACTION_VIEW);
+                donateLink.setData(Uri.parse(getString(R.string.buydrink_link)));
+                startActivity(donateLink);
+            }
+        });
 
         // Highlights all text for fast deletion when you select the d10 text box
         etDice.setOnClickListener(new View.OnClickListener() {

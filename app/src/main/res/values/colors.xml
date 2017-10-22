@@ -3,4 +3,5 @@
     <color name="accent_material_light">#ebd624</color>
     <color name="primary_material_light">#e7d21e</color>
     <color name="primary_dark_material_light">#cfbc0f</color>
+    <color name="html_link">#3460f4</color>
 </resources>

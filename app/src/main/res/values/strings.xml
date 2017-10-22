@@ -1,5 +1,7 @@
 <resources>
     <string name="app_name">Resplendent Exalted Dice Roller</string>
+    <string name="buydrink">Now ad free: buy the developer a drink?</string>
+    <string name="buydrink_link">https://www.paypal.me/hokaze/2GBP</string>
     <string name="number_of_d10s">Number of d10s:</string>
     <string name="_10s_count_as_doubles">10s count as doubles</string>
     <string name="botches_subtract_successes">Botches subtract successes</string>
