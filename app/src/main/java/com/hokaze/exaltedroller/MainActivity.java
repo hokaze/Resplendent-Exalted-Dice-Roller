@@ -26,8 +26,6 @@ import android.widget.EditText;
 import android.widget.Spinner;
 import android.widget.TextView;
 
-import com.google.android.gms.ads.AdRequest;
-import com.google.android.gms.ads.AdView;
 import com.google.firebase.analytics.FirebaseAnalytics;
 
 import java.util.ArrayList;
@@ -37,7 +35,6 @@ import java.util.regex.Pattern;
 
 public class MainActivity extends AppCompatActivity {
 
-    private AdView mAdView;
     private FirebaseAnalytics mFirebaseAnalytics;
 
     Button bRoll, bTricks;
@@ -73,16 +70,6 @@ public class MainActivity extends AppCompatActivity {
         checkTens=(CheckBox)findViewById(R.id.doubleTens);
         checkBotches=(CheckBox)findViewById(R.id.botchesSubtract);
         checkEx3=(CheckBox)findViewById(R.id.enableEx3);
-
-        mAdView = (AdView) findViewById(R.id.adView);
-        // Deploy test ads to emulator and test physical device, other devices will get real ads
-        // (Don't want to accidentally click my own ads and get suspended!)
-        AdRequest adRequest = new AdRequest.Builder()
-                //.addTestDevice(AdRequest.DEVICE_ID_EMULATOR) // All emulators
-                .addTestDevice("9E352341EE24936E89C7621696793500")  // My Phone as test device
-                .build();
-        //AdRequest adRequest = new AdRequest.Builder().build(); // Actual ads
-        mAdView.loadAd(adRequest);
 
         // Highlights all text for fast deletion when you select the d10 text box
         etDice.setOnClickListener(new View.OnClickListener() {
