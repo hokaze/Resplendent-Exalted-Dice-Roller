@@ -1,2 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
-<resources></resources>
+<resources>
+    <color name="accent_material_light">#ebd624</color>
+    <color name="primary_material_light">#e7d21e</color>
+    <color name="primary_dark_material_light">#cfbc0f</color>
+</resources>

@@ -7,8 +7,58 @@
     <string name="results">Results:</string>
     <string name="successes">Successes:</string>
     <string name="dice_tricks">Dice Tricks</string>
+    <string name="select_target_number">Select Target Number:</string>
+    <string name="select_doubles_number">Select Doubles Number:</string>
+    <string name="apply_tricks">Apply Dice Tricks</string>
     <string name="enable_3rd_edition_dice_tricks">Enable Dice Tricks:</string>
     <string name="colour_highlighting">Colour highlighting</string>
+
+    <string-array name="target_number_array">
+        <item>1</item>
+        <item>2</item>
+        <item>3</item>
+        <item>4</item>
+        <item>5</item>
+        <item>6</item>
+        <item>7</item>
+        <item>8</item>
+        <item>9</item>
+        <item>10</item>
+    </string-array>
+
+    <string-array name="doubles_number_array">
+        <item>1</item>
+        <item>2</item>
+        <item>3</item>
+        <item>4</item>
+        <item>5</item>
+        <item>6</item>
+        <item>7</item>
+        <item>8</item>
+        <item>9</item>
+        <item>10</item>
+        <item>No</item>
+    </string-array>
+
+    <string name="dt_array_0">Target Number:</string>
+    <string name="dt_array_1">Double Successes:</string>
+    <string name="dt_array_2">Exploding 10s</string>
+    <string name="dt_array_3">Reroll 6s once</string>
+    <string name="dt_array_4">Reroll 5s once</string>
+    <string name="dt_array_5">Reroll 1s once</string>
+    <string name="dt_array_6">Reroll non-successes once</string>
+
+    <string-array name="dice_tricks_array">
+        <item>@string/dt_array_0</item>
+        <item>@string/dt_array_1</item>
+        <item>@string/dt_array_2</item>
+        <item>@string/dt_array_3</item>
+        <item>@string/dt_array_4</item>
+        <item>@string/dt_array_5</item>
+        <item>@string/dt_array_6</item>
+    </string-array>
+
+
 
     <!-- AdMob ad unit IDs -->
     <string name="banner_ad_unit_id"> ca-app-pub-3891762784020205/7005607976</string>

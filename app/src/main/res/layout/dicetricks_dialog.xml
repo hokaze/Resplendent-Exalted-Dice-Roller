@@ -1,6 +1,117 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:orientation="vertical" android:layout_width="match_parent"
-    android:layout_height="match_parent">
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="wrap_content"
+    android:layout_height="match_parent"
+    android:layout_margin="5dp"
+    android:orientation="vertical"
+    android:padding="10dp">
 
-</LinearLayout>
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:paddingTop="10dp">
+
+        <TextView
+            android:id="@+id/targetNumberLabel"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentLeft="true"
+            android:layout_alignParentStart="true"
+            android:layout_alignParentTop="true"
+            android:layout_margin="5dp"
+            android:paddingBottom="5dp"
+            android:layout_toStartOf="@+id/targetNumberSpinner"
+            android:maxLines="1"
+            android:text="@string/dt_array_0"
+            android:textAppearance="@style/TextAppearance.AppCompat.Medium"
+            android:textColor="?android:attr/textColorPrimary" />
+
+        <Spinner
+            android:id="@+id/targetNumberSpinner"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentRight="true"
+            android:layout_alignParentTop="true"
+            android:layout_margin="5dp"
+            android:entries="@array/target_number_array"
+            android:prompt="@string/select_target_number"
+            android:spinnerMode="dialog" />
+
+        <TextView
+            android:id="@+id/doubleSuccessesLabel"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentLeft="true"
+            android:layout_below="@+id/targetNumberLabel"
+            android:layout_margin="5dp"
+            android:paddingBottom="10dp"
+            android:layout_toStartOf="@+id/doubleSuccessesSpinner"
+            android:maxLines="1"
+            android:text="@string/dt_array_1"
+            android:textAppearance="@style/TextAppearance.AppCompat.Medium"
+            android:textColor="?android:attr/textColorPrimary" />
+
+        <Spinner
+            android:id="@+id/doubleSuccessesSpinner"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentRight="true"
+            android:layout_below="@+id/targetNumberLabel"
+            android:layout_margin="5dp"
+            android:entries="@array/doubles_number_array"
+            android:prompt="@string/select_doubles_number"
+            android:spinnerMode="dialog" />
+
+        <CheckBox
+            android:id="@+id/explodingTensCheckbox"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/doubleSuccessesLabel"
+            android:checked="false"
+            android:text="@string/dt_array_2"
+            android:layout_alignParentLeft="true"
+            android:textAppearance="@style/TextAppearance.AppCompat.Medium"/>
+
+        <CheckBox
+            android:id="@+id/reroll6sCheckbox"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/explodingTensCheckbox"
+            android:checked="false"
+            android:text="@string/dt_array_3"
+            android:layout_alignParentLeft="true"
+            android:textAppearance="@style/TextAppearance.AppCompat.Medium" />
+
+        <CheckBox
+            android:id="@+id/reroll5sCheckbox"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/reroll6sCheckbox"
+            android:checked="false"
+            android:text="@string/dt_array_4"
+            android:layout_alignParentLeft="true"
+            android:textAppearance="@style/TextAppearance.AppCompat.Medium" />
+
+        <CheckBox
+            android:id="@+id/reroll1sCheckbox"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/reroll5sCheckbox"
+            android:checked="false"
+            android:text="@string/dt_array_5"
+            android:layout_alignParentLeft="true"
+            android:textAppearance="@style/TextAppearance.AppCompat.Medium" />
+
+        <CheckBox
+            android:id="@+id/rerollNonSuccessesCheckbox"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/reroll1sCheckbox"
+            android:checked="false"
+            android:text="@string/dt_array_6"
+            android:layout_alignParentLeft="true"
+            android:textAppearance="@style/TextAppearance.AppCompat.Medium" />
+
+    </RelativeLayout>
+
+</ScrollView>

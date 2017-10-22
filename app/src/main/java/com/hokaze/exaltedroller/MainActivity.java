@@ -17,15 +17,15 @@ import android.text.Spanned;
 import android.text.method.ScrollingMovementMethod;
 import android.text.style.ForegroundColorSpan;
 import android.text.style.StyleSpan;
+import android.view.LayoutInflater;
 import android.view.Surface;
 import android.view.View;
 import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.EditText;
-import android.widget.ListView;
+import android.widget.Spinner;
 import android.widget.TextView;
 
-import com.google.android.gms.ads.MobileAds;
 import com.google.android.gms.ads.AdRequest;
 import com.google.android.gms.ads.AdView;
 import com.google.firebase.analytics.FirebaseAnalytics;
@@ -43,22 +43,22 @@ public class MainActivity extends AppCompatActivity {
     Button bRoll, bTricks;
     EditText etDice;
     TextView tvResults, tvSuccess;
-    CheckBox checkColours, checkTens, checkBotches, checkEx3;
+    CheckBox checkColours, checkTens, checkBotches, checkEx3,
+            checkExplode10s, checkReroll6s, checkReroll5s, checkReroll1s, checkRerollNonSuccesses;
+    Spinner tnSpinner, doublesSpinner;
     Random ranDice = new Random();
-    ArrayList<String> trickList = new ArrayList<String>();
-    boolean[] trickValues = new boolean[11]; // ugh, magic number for list size, need to declare early for save/restore
+    boolean[] trickValues = new boolean[5]; // all tricks disable to false on init
     SpannableStringBuilder builder = new SpannableStringBuilder("Results: ");
     String simple = "Results: ";
     SpannableStringBuilder successStr = new SpannableStringBuilder("Successes: ");
-    int diceCount = 0, targetNumber = 7, doubleNumber = 11;
+    int diceCount = 0, defaultTargetNumber = 7, defaultDoubleNumber = 11,
+            targetNumber = defaultTargetNumber, doubleNumber = defaultDoubleNumber,
+            trickTargetNumber = defaultTargetNumber, trickDoubleNumber = defaultDoubleNumber;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-
-        // Initialise ads api at launch to minimise latency of requests
-        //MobileAds.initialize(getApplicationContext(), "ca-app-pub-3891762784020205/7005607976");
 
         // Obtain the FirebaseAnalytics instance.
         mFirebaseAnalytics = FirebaseAnalytics.getInstance(this);
@@ -74,7 +74,7 @@ public class MainActivity extends AppCompatActivity {
         checkBotches=(CheckBox)findViewById(R.id.botchesSubtract);
         checkEx3=(CheckBox)findViewById(R.id.enableEx3);
 
-        AdView mAdView = (AdView) findViewById(R.id.adView);
+        mAdView = (AdView) findViewById(R.id.adView);
         // Deploy test ads to emulator and test physical device, other devices will get real ads
         // (Don't want to accidentally click my own ads and get suspended!)
         AdRequest adRequest = new AdRequest.Builder()
@@ -83,22 +83,6 @@ public class MainActivity extends AppCompatActivity {
                 .build();
         //AdRequest adRequest = new AdRequest.Builder().build(); // Actual ads
         mAdView.loadAd(adRequest);
-
-        trickList.add("Double 9s and above");
-        trickList.add("Double 8s and above");
-        trickList.add("Double 7s and above");
-        trickList.add("Exploding 10s");
-        trickList.add("Reroll 6s once");
-        trickList.add("Reroll 5s once");
-        trickList.add("Reroll 1s once");
-        trickList.add("Reroll non-successes once");
-        trickList.add("6s and above are successes");
-        trickList.add("5s and above are successes");
-        trickList.add("4s and above are successes");
-
-        // Convert arraylist into charsequence for dialog checkbox and store the values
-        final CharSequence[] dialogList = trickList.toArray(new CharSequence[trickList.size()]);
-        trickValues = new boolean[dialogList.length]; // checkbox persists when dialog is closed
 
         // Highlights all text for fast deletion when you select the d10 text box
         etDice.setOnClickListener(new View.OnClickListener() {
@@ -168,27 +152,24 @@ public class MainActivity extends AppCompatActivity {
                             }
 
                             // Determine which numbers have success, doubles, rerolls, etc
-                            targetNumber = 7;
-                            doubleNumber = 11; // cannot get double successes unless double 10s/9s/8s/7s in effect
+                            targetNumber = defaultTargetNumber;
+                            doubleNumber = defaultDoubleNumber; // cannot get double successes unless double 10s/9s/8s/7s in effect
                             ArrayList<Integer> rerollList = new ArrayList<Integer>();
                             boolean rerollAllowed = true; // Set to false for dice created by non-exploding reroll dice tricks
                             if (checkTens.isChecked()) {doubleNumber = 10;}
                             if (checkEx3.isChecked()) {
-                                // Double 9s/8s/7s
-                                if (trickValues[0] == true) {doubleNumber = 9;}
-                                if (trickValues[1] == true) {doubleNumber = 8;}
-                                if (trickValues[2] == true) {doubleNumber = 7;}
-                                // Exploding 10s, reroll 6s/5s/1s
-                                if (trickValues[3] == true) {rerollList.add(10);}
-                                if (trickValues[4] == true) {rerollList.add(6);}
-                                if (trickValues[5] == true) {rerollList.add(5);}
-                                if (trickValues[6] == true) {rerollList.add(1);}
-                                // TN 6s/5s/4s
-                                if (trickValues[8] == true) {targetNumber = 6;}
-                                if (trickValues[9] == true) {targetNumber = 5;}
-                                if (trickValues[10] == true) {targetNumber = 4;}
+                                // Alternative Target Number
+                                targetNumber = trickTargetNumber;
+                                // Double Successes enabled
+                                doubleNumber = trickDoubleNumber;
+                                // Exploding 10s
+                                if (trickValues[0] == true) {rerollList.add(10);}
+                                // Reroll 6s/5s/1s
+                                if (trickValues[1] == true) {rerollList.add(6);}
+                                if (trickValues[2] == true) {rerollList.add(5);}
+                                if (trickValues[3] == true) {rerollList.add(1);}
                                 // Reroll non-successes
-                                if (trickValues[7] == true) {
+                                if (trickValues[4] == true) {
                                     for (int i = 1; i < targetNumber; ++i) {
                                         // If any of the above rerolls are enabled, the number is added to the list
                                         // twice, but doesn't trigger 2d10 extra, only 1d10
@@ -417,99 +398,45 @@ public class MainActivity extends AppCompatActivity {
                 final AlertDialog.Builder builderDialog = new AlertDialog.Builder(MainActivity.this);
                 builderDialog.setTitle("Select Dice Tricks");
 
-                // Setup dialog using setMutliChoiceItem method to enable checkboxes
-                builderDialog.setMultiChoiceItems(dialogList, trickValues, new DialogInterface.OnMultiChoiceClickListener() {
-                            // Set on click of some options to auto-enable others: no functional change but makes
-                            // the UI and the results more obvious to users
-                            @Override
-                            public void onClick(DialogInterface dialog, int whichButton, boolean isChecked) {
-                                ListView list = ((AlertDialog) dialog).getListView();
-                                // Disabling double 9s will disable doubles 8s and 7s in the UI
-                                if (whichButton == 0) {
-                                    if (list.isItemChecked(0)) {
-                                        // do nothing
-                                    }
-                                    else {
-                                        trickValues[1] = false;
-                                        list.setItemChecked(1, false);
-                                        trickValues[2] = false;
-                                        list.setItemChecked(2, false);
-                                    }
-                                }
-                                // Setting double 8s and above sets double 9s in the UI
-                                if (whichButton == 1) {
-                                    if (list.isItemChecked(1)) {
-                                        trickValues[0] = true;
-                                        list.setItemChecked(0, true);
-                                    }
-                                    // Disabling double 8s will disable double 9s if applicable
-                                    else {
-                                        trickValues[2] = false;
-                                        list.setItemChecked(2, false);
-                                    }
-                                }
-                                // Setting double 7s and above sets double 8s and 9s in the UI
-                                if (whichButton == 2) {
-                                    if (list.isItemChecked(2)) {
-                                        trickValues[0] = true;
-                                        list.setItemChecked(0, true);
-                                        trickValues[1] = true;
-                                        list.setItemChecked(1, true);
-                                    }
-                                }
-                                // Disabling TN 6 will disable TN 5 and TN 4 in the UI
-                                if (whichButton == 8) {
-                                    if (list.isItemChecked(8)) {
-                                        // do nothing
-                                    }
-                                    else {
-                                        trickValues[9] = false;
-                                        list.setItemChecked(9, false);
-                                        trickValues[10] = false;
-                                        list.setItemChecked(10, false);
-                                    }
-                                }
-                                // Setting TN 5s and above sets TN 6
-                                if (whichButton == 9) {
-                                    if (list.isItemChecked(9)) {
-                                        trickValues[8] = true;
-                                        list.setItemChecked(8, true);
-                                    }
-                                    // Disabling TN 5s will disable TN 4 if applicable
-                                    else {
-                                        trickValues[10] = false;
-                                        list.setItemChecked(10, false);
-                                    }
-                                }
-                                // Setting TN 4s and above sets TN 5 and TN 6
-                                if (whichButton == 10) {
-                                    if (list.isItemChecked(10)) {
-                                        trickValues[8] = true;
-                                        list.setItemChecked(8, true);
-                                        trickValues[9] = true;
-                                        list.setItemChecked(9, true);
-                                    }
-                                }
-                            }
-                        });
+                // Inflate and set the custom layout for the dialog
+                // Pass null as the parent view because its going in the dialog layout
+                LayoutInflater inflater = getLayoutInflater();
+                View dialogView = inflater.inflate(R.layout.dicetricks_dialog, null);
+                builderDialog.setView(dialogView);
+
+                // Use dialogView.findViewById so we look inside dicetricks_dialog.xml instead of activity_main.xml
+                tnSpinner=(Spinner)dialogView.findViewById(R.id.targetNumberSpinner);
+                doublesSpinner=(Spinner)dialogView.findViewById(R.id.doubleSuccessesSpinner);
+                checkExplode10s=(CheckBox)dialogView.findViewById(R.id.explodingTensCheckbox);
+                checkReroll6s=(CheckBox)dialogView.findViewById(R.id.reroll6sCheckbox);
+                checkReroll5s=(CheckBox)dialogView.findViewById(R.id.reroll5sCheckbox);
+                checkReroll1s=(CheckBox)dialogView.findViewById(R.id.reroll1sCheckbox);
+                checkRerollNonSuccesses=(CheckBox)dialogView.findViewById(R.id.rerollNonSuccessesCheckbox);
+
+                // Set spinners and checkboxes to the correct values
+                tnSpinner.setSelection(targetNumber-1);
+                doublesSpinner.setSelection(doubleNumber-1);
+                checkExplode10s.setChecked(trickValues[0]);
+                checkReroll6s.setChecked(trickValues[1]);
+                checkReroll5s.setChecked(trickValues[2]);
+                checkReroll1s.setChecked(trickValues[3]);
+                checkRerollNonSuccesses.setChecked(trickValues[4]);
 
                 // Confirm
                 builderDialog.setPositiveButton("OK", new DialogInterface.OnClickListener() {
                             @Override
                             public void onClick(DialogInterface dialog, int which) {
+                                // Keep trick numbers seperate from main, so we can restore them easily
+                                // when tricks are toggled on and off
+                                trickTargetNumber = tnSpinner.getSelectedItemPosition()+1;
+                                trickDoubleNumber = doublesSpinner.getSelectedItemPosition()+1;
 
-                                ListView list = ((AlertDialog) dialog).getListView();
-                                // make selected item in the comma seprated string
-                                StringBuilder stringBuilder = new StringBuilder();
-                                for (int i = 0; i < list.getCount(); i++) {
-                                    boolean checked = list.isItemChecked(i);
-
-                                    if (checked) {
-                                        if (stringBuilder.length() > 0) stringBuilder.append(",");
-                                        stringBuilder.append(list.getItemAtPosition(i));
-
-                                    }
-                                }
+                                // Get checkbox states
+                                trickValues[0] = checkExplode10s.isChecked();
+                                trickValues[1] = checkReroll6s.isChecked();
+                                trickValues[2] = checkReroll5s.isChecked();
+                                trickValues[3] = checkReroll1s.isChecked();
+                                trickValues[4] = checkRerollNonSuccesses.isChecked();
                             }
                         });
 
@@ -565,6 +492,8 @@ public class MainActivity extends AppCompatActivity {
         savedInstanceState.putString("ResultsString", tvResults.getText().toString()); // plain string, no formatting
         savedInstanceState.putInt("TargetNumber", targetNumber);
         savedInstanceState.putInt("DoubleNumber", doubleNumber);
+        savedInstanceState.putInt("TrickTargetNumber", trickTargetNumber);
+        savedInstanceState.putInt("TrickDoubleNumber", trickDoubleNumber);
         savedInstanceState.putString("SuccessString", Html.toHtml(successStr));
     }
 
@@ -576,6 +505,8 @@ public class MainActivity extends AppCompatActivity {
         trickValues = savedInstanceState.getBooleanArray("DiceTrickValues");
         targetNumber = savedInstanceState.getInt("TargetNumber");
         doubleNumber = savedInstanceState.getInt("DoubleNumber");
+        trickTargetNumber = savedInstanceState.getInt("TrickTargetNumber");
+        trickDoubleNumber = savedInstanceState.getInt("TrickDoubleNumber");
         // Make successes/botches display the number in bold on reload
         Spanned spanSuccess = Html.fromHtml(savedInstanceState.getString("SuccessString"));
         successStr = new SpannableStringBuilder();

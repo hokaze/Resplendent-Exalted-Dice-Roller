@@ -15,6 +15,14 @@
       },
       "oauth_client": [
         {
+          "client_id": "475138576887-cfeqrnqel3grqjh1n7bp3iaoqhdqlrh7.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.hokaze.exaltedroller",
+            "certificate_hash": "997f164e2feb6cc5b8020df9bf1e99faf86f832a"
+          }
+        },
+        {
           "client_id": "475138576887-02264fl289gqpiebliu939r03t26d4c0.apps.googleusercontent.com",
           "client_type": 1,
           "android_info": {
