@@ -7,7 +7,7 @@ android {
         applicationId "com.hokaze.exaltedroller"
         minSdkVersion 16
         targetSdkVersion 26
-        versionCode 7
+        versionCode 8
         versionName "1.31"
     }
     buildTypes {
