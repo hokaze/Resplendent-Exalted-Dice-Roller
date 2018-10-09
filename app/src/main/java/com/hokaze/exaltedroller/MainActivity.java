@@ -73,16 +73,6 @@ public class MainActivity extends AppCompatActivity {
         checkBotches=(CheckBox)findViewById(R.id.botchesSubtract);
         checkEx3=(CheckBox)findViewById(R.id.enableEx3);
 
-        // Instead of ads, people can now donate to me by "buying me a drink"
-        bBuyDrink=(Button)findViewById(R.id.buyDrinkButton);
-        bBuyDrink.setOnClickListener(new View.OnClickListener() {
-            public void onClick(View v) {
-                Intent donateLink = new Intent(android.content.Intent.ACTION_VIEW);
-                donateLink.setData(Uri.parse(getString(R.string.buydrink_link)));
-                startActivity(donateLink);
-            }
-        });
-
         // Highlights all text for fast deletion when you select the d10 text box
         etDice.setOnClickListener(new View.OnClickListener() {
             @Override
