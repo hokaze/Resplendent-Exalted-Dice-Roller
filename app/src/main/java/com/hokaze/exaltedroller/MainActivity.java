@@ -87,7 +87,7 @@ public class MainActivity extends AppCompatActivity {
         checkTens.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
             public void onCheckedChanged(CompoundButton buttonView,boolean isChecked) {
-                if (checkTens.isChecked() == false) { doubleNumber = 11; trickDoubleNumber = 11; }
+                if (!checkTens.isChecked()) { doubleNumber = 11; trickDoubleNumber = 11; }
                 else {
                     if (checkEx3.isChecked()) {
                         if (trickDoubleNumber <= defaultDoubleNumber) { doubleNumber = trickDoubleNumber; }
@@ -101,7 +101,7 @@ public class MainActivity extends AppCompatActivity {
         checkEx3.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
             public void onCheckedChanged(CompoundButton buttonView,boolean isChecked) {
-                if (checkEx3.isChecked() == false) {
+                if (!checkEx3.isChecked()) {
                     targetNumber = defaultTargetNumber;
                     if (checkTens.isChecked()) { doubleNumber = defaultDoubleNumber; }
                     else { doubleNumber = 11; }
@@ -158,7 +158,7 @@ public class MainActivity extends AppCompatActivity {
                             int successes = 0, botches = 0;
 
                             // Prepare results view
-                            if (checkColours.isChecked() == true) {
+                            if (checkColours.isChecked()) {
                                 // Creating a new SSB and letting the garbage collector discard the old one
                                 // seems to be faster than using .clear() on large data. This way fixes
                                 // the speed issue where rolling 1000+ dice would then cause a delay on the next
@@ -183,13 +183,13 @@ public class MainActivity extends AppCompatActivity {
                                 // Double Successes enabled
                                 doubleNumber = trickDoubleNumber;
                                 // Exploding 10s
-                                if (trickValues[0] == true) {rerollList.add(10);}
+                                if (trickValues[0]) {rerollList.add(10);}
                                 // Reroll 6s/5s/1s
-                                if (trickValues[1] == true) {rerollList.add(6);}
-                                if (trickValues[2] == true) {rerollList.add(5);}
-                                if (trickValues[3] == true) {rerollList.add(1);}
+                                if (trickValues[1]) {rerollList.add(6);}
+                                if (trickValues[2]) {rerollList.add(5);}
+                                if (trickValues[3]) {rerollList.add(1);}
                                 // Reroll non-successes
-                                if (trickValues[4] == true) {
+                                if (trickValues[4]) {
                                     for (int i = 1; i < targetNumber; ++i) {
                                         // If any of the above rerolls are enabled, the number is added to the list
                                         // twice, but doesn't trigger 2d10 extra, only 1d10
@@ -227,7 +227,7 @@ public class MainActivity extends AppCompatActivity {
                                 }
 
                                 // Check for exploding dice or rerolls
-                                if (rerollAllowed == true && rerollList.size() > 0) {
+                                if (rerollAllowed && rerollList.size() > 0) {
                                     // Re-roll with enhanced for loop for slightly faster performance
                                     for (Integer d : rerollList) {
                                         if (randomInt == d) {
@@ -254,7 +254,7 @@ public class MainActivity extends AppCompatActivity {
                                     SpannableString resultStr = new SpannableString(String.valueOf(randomInt));
 
                                     builder.append(resultStr);
-                                    if (bold == true) {
+                                    if (bold) {
                                         builder.append("r");
                                     }
                                     builder.append(" ");
@@ -262,7 +262,7 @@ public class MainActivity extends AppCompatActivity {
                                 }
                                 else {
                                     simple += String.valueOf(randomInt);
-                                    if (bold == true) {
+                                    if (bold) {
                                         simple += "r"; // indicate rerolls without bold text
                                     }
                                     simple += " ";
@@ -405,7 +405,7 @@ public class MainActivity extends AppCompatActivity {
                 }
 
                 // Roll with <1000 dice count, so no loading display
-                if (inDialog[0] == false) {
+                if (!inDialog[0]) {
                     rollDice();
                 }
             }
