@@ -2,14 +2,12 @@ package com.hokaze.exaltedroller;
 
 import android.app.ProgressDialog;
 import android.content.DialogInterface;
-import android.content.Intent;
 import android.content.pm.ActivityInfo;
 import android.content.res.Configuration;
 import android.graphics.Color;
 import android.graphics.Typeface;
-import android.net.Uri;
-import android.support.v7.app.AlertDialog;
-import android.support.v7.app.AppCompatActivity;
+import androidx.appcompat.app.AlertDialog;
+import androidx.appcompat.app.AppCompatActivity;
 import android.os.Bundle;
 import android.text.Html;
 import android.text.Spannable;
@@ -39,7 +37,7 @@ public class MainActivity extends AppCompatActivity {
 
     private FirebaseAnalytics mFirebaseAnalytics;
 
-    Button bRoll, bTricks, bBuyDrink;
+    Button bRoll, bTricks;
     EditText etDice;
     TextView tvResults, tvSuccess;
     CheckBox checkColours, checkTens, checkBotches, checkEx3,
