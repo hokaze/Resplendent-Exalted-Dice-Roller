@@ -477,7 +477,12 @@ public class MainActivity extends AppCompatActivity {
     // Alternative formatting for results by regexing the spannablestringbuilder
     public void regexResults() {
         // Green/Blue: successes/doubles
-        String regex = String.format("[%d-9]|10", targetNumber); // matches range of TN to 9 OR 10
+        String regex = "";
+        if (targetNumber < 10) {
+            regex = String.format("[%d-9]|10", targetNumber); // matches range of TN to 9 OR 10
+        }
+        // TN 10 causes issue with above regex as it tries to do 10-9 | 10, which results in all numbers highlighted green
+        else { regex = "10"; }
         Pattern ptn = Pattern.compile(regex);
         Matcher matcher = ptn.matcher(builder.toString());
         while (matcher.find()) {
@@ -487,13 +492,15 @@ public class MainActivity extends AppCompatActivity {
             }
             builder.setSpan(spanC, matcher.start(), matcher.end()+1, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE); // +1 to include "r" if appropriate
         }
-        // Red: botches
-        regex = "1r|1 ";
-        ptn = Pattern.compile(regex);
-        matcher = ptn.matcher(builder.toString());
-        while (matcher.find()) {
-            ForegroundColorSpan spanC = new ForegroundColorSpan(Color.rgb(200, 50, 50));
-            builder.setSpan(spanC, matcher.start(), matcher.end(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+        // Red: botches (but only if not using TN 1)
+        if (targetNumber > 1) {
+            regex = "1r|1 ";
+            ptn = Pattern.compile(regex);
+            matcher = ptn.matcher(builder.toString());
+            while (matcher.find()) {
+                ForegroundColorSpan spanC = new ForegroundColorSpan(Color.rgb(200, 50, 50));
+                builder.setSpan(spanC, matcher.start(), matcher.end(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+            }
         }
         // Italics: rerolls
         regex = "[1-9]r|10r";
