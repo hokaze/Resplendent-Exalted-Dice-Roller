@@ -22,6 +22,7 @@ import android.view.Surface;
 import android.view.View;
 import android.widget.Button;
 import android.widget.CheckBox;
+import android.widget.CompoundButton;
 import android.widget.EditText;
 import android.widget.Spinner;
 import android.widget.TextView;
@@ -77,6 +78,38 @@ public class MainActivity extends AppCompatActivity {
             public void onClick(View v) {
                 etDice.setText(etDice.getText());
                 etDice.selectAll();
+            }
+        });
+
+        // Change values when the checkboxes are toggled, whether by the user or automatically from dice trick options
+        // instead of waiting to roll to change target numbers, double numbers, etc.
+        // Should address issues where the app seems to "forget" the settings assigned to it via dice tricks
+        checkTens.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton buttonView,boolean isChecked) {
+                if (checkTens.isChecked() == false) { doubleNumber = 11; trickDoubleNumber = 11; }
+                else {
+                    if (checkEx3.isChecked()) {
+                        if (trickDoubleNumber <= defaultDoubleNumber) { doubleNumber = trickDoubleNumber; }
+                        else { doubleNumber = defaultDoubleNumber; trickDoubleNumber = defaultDoubleNumber; }
+                    }
+                    else { doubleNumber = defaultDoubleNumber; }
+                }
+            }
+        });
+
+        checkEx3.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton buttonView,boolean isChecked) {
+                if (checkEx3.isChecked() == false) {
+                    targetNumber = defaultTargetNumber;
+                    if (checkTens.isChecked()) { doubleNumber = defaultDoubleNumber; }
+                    else { doubleNumber = 11; }
+                }
+                else {
+                    targetNumber = trickTargetNumber;
+                    if (trickDoubleNumber <= defaultDoubleNumber) { checkTens.setChecked(true); }
+                }
             }
         });
 
@@ -385,9 +418,6 @@ public class MainActivity extends AppCompatActivity {
                 final AlertDialog.Builder builderDialog = new AlertDialog.Builder(MainActivity.this);
                 builderDialog.setTitle("Select Dice Tricks");
 
-                // UX: If they've clicked on Dice Tricks, they probably want them enabled, so tick the checkbox for the user automatically
-                checkEx3.setChecked(true);
-
                 // Inflate and set the custom layout for the dialog
                 // Pass null as the parent view because its going in the dialog layout
                 LayoutInflater inflater = getLayoutInflater();
@@ -404,8 +434,8 @@ public class MainActivity extends AppCompatActivity {
                 checkRerollNonSuccesses=(CheckBox)dialogView.findViewById(R.id.rerollNonSuccessesCheckbox);
 
                 // Set spinners and checkboxes to the correct values
-                tnSpinner.setSelection(targetNumber-1);
-                doublesSpinner.setSelection(doubleNumber-1);
+                tnSpinner.setSelection(trickTargetNumber-1);
+                doublesSpinner.setSelection(trickDoubleNumber-1);
                 checkExplode10s.setChecked(trickValues[0]);
                 checkReroll6s.setChecked(trickValues[1]);
                 checkReroll5s.setChecked(trickValues[2]);
@@ -431,6 +461,9 @@ public class MainActivity extends AppCompatActivity {
                                 // UX: Toggle double 10s checkbox automatically to off if set to No doubles
                                 if (trickDoubleNumber > 10) { checkTens.setChecked(false); }
                                 else { checkTens.setChecked(true); }
+
+                                // UX: If they've clicked on Dice Tricks, they probably want them enabled, so tick the checkbox for the user automatically
+                                checkEx3.setChecked(true);
                             }
                         });
 
