@@ -48,7 +48,7 @@ public class MainActivity extends AppCompatActivity {
     SpannableStringBuilder builder = new SpannableStringBuilder("Results: ");
     String simple = "Results: ";
     SpannableStringBuilder successStr = new SpannableStringBuilder("Successes: ");
-    int diceCount = 0, defaultTargetNumber = 7, defaultDoubleNumber = 11,
+    int diceCount = 0, defaultTargetNumber = 7, defaultDoubleNumber = 10,
             targetNumber = defaultTargetNumber, doubleNumber = defaultDoubleNumber,
             trickTargetNumber = defaultTargetNumber, trickDoubleNumber = defaultDoubleNumber;
 
@@ -143,7 +143,7 @@ public class MainActivity extends AppCompatActivity {
                             doubleNumber = defaultDoubleNumber; // cannot get double successes unless double 10s/9s/8s/7s in effect
                             ArrayList<Integer> rerollList = new ArrayList<Integer>();
                             boolean rerollAllowed = true; // Set to false for dice created by non-exploding reroll dice tricks
-                            if (checkTens.isChecked()) {doubleNumber = 10;}
+                            if (!checkTens.isChecked()) {doubleNumber = 11;}
                             if (checkEx3.isChecked()) {
                                 // Alternative Target Number
                                 targetNumber = trickTargetNumber;
@@ -385,6 +385,9 @@ public class MainActivity extends AppCompatActivity {
                 final AlertDialog.Builder builderDialog = new AlertDialog.Builder(MainActivity.this);
                 builderDialog.setTitle("Select Dice Tricks");
 
+                // UX: If they've clicked on Dice Tricks, they probably want them enabled, so tick the checkbox for the user automatically
+                checkEx3.setChecked(true);
+
                 // Inflate and set the custom layout for the dialog
                 // Pass null as the parent view because its going in the dialog layout
                 LayoutInflater inflater = getLayoutInflater();
@@ -424,6 +427,10 @@ public class MainActivity extends AppCompatActivity {
                                 trickValues[2] = checkReroll5s.isChecked();
                                 trickValues[3] = checkReroll1s.isChecked();
                                 trickValues[4] = checkRerollNonSuccesses.isChecked();
+
+                                // UX: Toggle double 10s checkbox automatically to off if set to No doubles
+                                if (trickDoubleNumber > 10) { checkTens.setChecked(false); }
+                                else { checkTens.setChecked(true); }
                             }
                         });
 
